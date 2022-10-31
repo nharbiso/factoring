@@ -1,3 +1,5 @@
+package version2.utilities;
+
 public class Scripts
 {
    public static String superscript(String str)

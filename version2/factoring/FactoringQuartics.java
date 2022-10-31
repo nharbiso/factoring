@@ -1,7 +1,14 @@
+package version2.factoring;
+
+import version2.utilities.Expression;
+import version2.utilities.Fraction;
+import version2.utilities.Functions;
+
 import java.util.*;
 import java.math.BigInteger;
+
 /**
-*  Class utilized to factor an quartic expression. 
+*  Class utilized to factor a quartic expression.
 *  Formulas and algorithm obtained from
 *  https://www.maa.org/sites/default/files/Brookfield2007-103574.pdf
 *  @author Nathan Harbison

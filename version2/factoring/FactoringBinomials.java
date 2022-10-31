@@ -1,3 +1,9 @@
+package version2.factoring;
+
+import version2.utilities.Expression;
+import version2.utilities.Fraction;
+import version2.utilities.Functions;
+
 import java.util.*;
 /**
 *  Class utilized to factor a binomial expression

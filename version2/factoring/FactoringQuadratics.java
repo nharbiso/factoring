@@ -1,5 +1,11 @@
+package version2.factoring;
+
+import version2.utilities.Expression;
+import version2.utilities.Term;
+import version2.utilities.Functions;
+
 import java.util.*;
-import java.math.BigInteger;
+
 /**
 *  Class utilized to factor an expression similarly to a quadratic
 *  @author Nathan Harbison

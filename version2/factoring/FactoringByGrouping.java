@@ -1,4 +1,12 @@
+package version2.factoring;
+
+import version2.utilities.Expression;
+import version2.utilities.Term;
+import version2.utilities.Fraction;
+import version2.utilities.Functions;
+
 import java.util.*;
+
 /**
 *  Class utilized to factor an expression by grouping
 *  @author Nathan Harbison

@@ -1,3 +1,8 @@
+package version2.main;
+
+import version2.factoring.*;
+import version2.utilities.*;
+
 import javax.swing.JOptionPane;
 import java.math.BigInteger;
 import java.util.*;

@@ -1,5 +1,8 @@
+package version2.utilities;
+
 import java.util.*;
 import java.math.*;
+
 public class Functions
 {
    public static boolean isSq(BigInteger b)

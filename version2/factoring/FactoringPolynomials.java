@@ -1,7 +1,15 @@
+package version2.factoring;
+
+import version2.utilities.Expression;
+import version2.utilities.Term;
+import version2.utilities.Fraction;
+import version2.utilities.Functions;
+
 import java.util.*;
 import java.math.BigInteger;
+
 /**
-*  Class utilized to factor an polynomial expression
+*  Class utilized to factor a polynomial expression
 *  @author Nathan Harbison
 */
 public class FactoringPolynomials

@@ -1,4 +1,9 @@
+package version2.utilities;
+
+import version2.utilities.Functions;
+
 import java.math.*;
+
 public class Fraction
 {
    private BigInteger num, denom;

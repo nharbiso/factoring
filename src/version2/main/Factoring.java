@@ -45,7 +45,7 @@ public class Factoring
    public static String factor(String ex) throws Exception
    {
       String[] terms = ex.split(String.format(WITH_DELIMITER, "\\+|-"));
-      ex = ex.substring(0, 1) + ex.substring(1, ex.length()).replaceAll("\\+", " + ").replaceAll("-", " - ");
+      ex = ex.charAt(0) + ex.substring(1).replaceAll("\\+", " + ").replaceAll("-", " - ");
       
       String[] variables = new String[terms.length];
       for(int x = 0; x < variables.length; x++)
@@ -63,6 +63,7 @@ public class Factoring
       String factor = exp.getFactor().toString();
       if((factor.contains("-1") && factor.length() < 3) || (factor.contains("1") && factor.length() < 2))
          factor = factor.replaceAll("1", "");
+
       String withFrac = ex;
       ex = exp.toString();
       

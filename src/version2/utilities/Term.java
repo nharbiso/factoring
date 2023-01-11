@@ -4,54 +4,58 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Class representing a term of an expression
+ * Class representing a term of an expression,
+ * with integer coefficients and variables
  * @author Nathan Harbison
  */
 public class Term
 {
-    /**
-     * Coefficient of the term
-     */
+    /** Coefficient of the term */
     private int coefficient;
-    /**
-     *  Map that maps each variable in the term to its power
-     */
-    private Map<Character, Integer> vars;
+    /** Map between each variable in the term and its power */
+    private final Map<Character, Integer> vars;
     /**
      *  Creates a new Term object with a given coefficient and variables
      *  expressed in a String object
-     *  @param c coefficient of the term
-     *  @param v variables of the term
+     *  @param coeff coefficient of the term
+     *  @param varStr the string written representation of the term's variables and powers
      */
-    public Term(int c, String v)
-    {
-        coefficient = c;
-        char[] arr = v.toCharArray();
-        vars = new HashMap<Character, Integer>();
-        for(int x = 0; x < arr.length; x++)
-            if(Character.isLetter(arr[x]))
-            {
-                if(x + 1 == arr.length || arr[x + 1] != '^')
-                    vars.put(arr[x], 1);
-                else
-                {
-                    int y = x + 2;
-                    while(y < arr.length && Character.isDigit(arr[y]))
-                        y++;
-                    vars.put(arr[x], Integer.parseInt(v.substring(x + 2, y)));
-                    x = y - 1;
+    public Term(int coeff, String varStr) {
+        this.coefficient = coeff;
+        char[] chars = varStr.toCharArray();
+        this.vars = new HashMap<>();
+        for(int i = 0; i < chars.length; i++) {
+            if (Character.isLetter(chars[i])) {
+                // power of one - no caret character
+                if (i + 1 == chars.length || chars[i + 1] != '^')
+                    this.vars.put(chars[i], 1);
+                // caret character present - any greater integer power
+                else {
+                    int endOfPower = i + 2; // find end of the integer power in string
+                    while (endOfPower < chars.length && Character.isDigit(chars[endOfPower]))
+                        endOfPower++;
+                    try {
+                        int power = Integer.parseInt(varStr.substring(i + 2, endOfPower));
+                        this.vars.put(chars[i], power);
+                    } catch(NumberFormatException ex) {
+                        throw new IllegalArgumentException("Error: Non-integer power given as a variable");
+                    }
+
+                    i = endOfPower - 1; // for loop addition will increase i to endOfPower
                 }
-            }
+            } else
+                throw new IllegalArgumentException("Error: Non-alphabetic character used as a variable");
+        }
     }
     /**
      *  Creates a new Term object with a given coefficient and variables
-     *  @param c coefficient of the term
-     *  @param v variables of the term
+     *  @param coeff coefficient of the term
+     *  @param vars variables of the term
      */
-    public Term(int c, Map<Character, Integer> v)
+    public Term(int coeff, Map<Character, Integer> vars)
     {
-        coefficient = c;
-        vars = v;
+        this.coefficient = coeff;
+        this.vars = vars;
     }
     /**
      *  Modifies the term's coefficient to the given value

@@ -1,3 +1,5 @@
+package version1;
+
 public class FactoringBinomials
 {
    public static String factor(Fraction[] coefficients, String[] var, int[][] pow, String factor, boolean printNotFactorable)

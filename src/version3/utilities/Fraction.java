@@ -1,21 +1,22 @@
-package version1;
+package version3.utilities;
 
 import java.math.*;
-public class Fraction
+import java.util.Optional;
+
+public class Fraction extends Number
 {
    private BigInteger num, denom;
-   private static Fraction[] nullArr = {new Fraction()};
-   public static Fraction ONE = new Fraction(1, 1);
-   public static Fraction NEGONE = new Fraction(-1, 1);
-   public static Fraction ZERO = new Fraction(0, 1);
-   public Fraction()
+   private static final Fraction[] nullArr = {new Fraction(0, 1)};
+   public static final Fraction ONE = new Fraction(1, 1);
+   public static final Fraction NEGONE = new Fraction(-1, 1);
+   public static final Fraction ZERO = new Fraction(0, 1);
+   public Fraction(BigInteger x)
    {
-      num = BigInteger.ZERO;
-      denom = BigInteger.ZERO;
+      this(x, BigInteger.ONE);
    }
    public Fraction(BigInteger x, BigInteger y)
    {
-      BigInteger gcd = Functions.gcd(x.abs(), y.abs());
+      BigInteger gcd = x.abs().gcd(y.abs());
       if(y.compareTo(BigInteger.ZERO) < 0)
          gcd = gcd.multiply(new BigInteger("-1"));
       num = x.divide(gcd);
@@ -24,6 +25,10 @@ public class Fraction
    public Fraction(int xx, int yy)
    {
       this(new BigInteger(""+xx), new BigInteger(""+yy));
+   }
+   public Fraction(int x)
+   {
+      this(new BigInteger(x+""), BigInteger.ONE);
    }
    public Fraction(BigInteger[] x)
    {
@@ -42,7 +47,7 @@ public class Fraction
          x = new BigInteger(str);
          y = BigInteger.ONE;
       }
-      BigInteger gcd = Functions.gcd(x.abs(), y.abs());
+      BigInteger gcd = x.abs().gcd(y.abs());
       num = x.divide(gcd);
       denom = y.divide(gcd);
    }
@@ -80,6 +85,12 @@ public class Fraction
          return num.toString()+"/"+denom.toString();
       return num.toString();
    }
+   public int toInt()
+   {
+      if(isWhole())
+         return num.intValue();
+      return (int) toDecimal();
+   }
    public double toDecimal()
    {
       return new BigDecimal(num).divide(new BigDecimal(denom), 100, RoundingMode.HALF_UP).doubleValue();
@@ -87,7 +98,7 @@ public class Fraction
    
    public Fraction add(Fraction f)
    {
-      BigInteger newDenom = denom.multiply(f.denom).divide(Functions.gcd(denom, f.denom));
+      BigInteger newDenom = denom.multiply(f.denom).divide(denom.gcd(f.denom));
       return new Fraction(num.multiply(newDenom.divide(denom)).add(f.num.multiply(newDenom.divide(f.denom))), newDenom);
    }
    public Fraction subtract(Fraction f)
@@ -98,9 +109,17 @@ public class Fraction
    {
       return new Fraction(num.multiply(f.num), denom.multiply(f.denom));
    }
+   public Fraction multiply(BigInteger i)
+   {
+      return multiply(new Fraction(i));
+   }
    public Fraction divide(Fraction f)
    {
       return multiply(f.reciprocal());
+   }
+   public Fraction divide(BigInteger i)
+   {
+      return multiply(new Fraction(BigInteger.ONE, i));
    }
    public Fraction inverse()
    {
@@ -114,21 +133,21 @@ public class Fraction
    {
       return new Fraction(num.pow(pow), denom.pow(pow));
    } 
-   public Fraction sqrt()
+   public Optional<Fraction> sqrt()
    {
       if(isSq())
-         return new Fraction(Functions.sqrt(num), Functions.sqrt(denom));
-      return new Fraction();
+         return Optional.of(new Fraction(Functions.sqrt(num), Functions.sqrt(denom)));
+      return Optional.empty();
    }
-   public Fraction cbrt()
+   public Optional<Fraction> cbrt()
    {
       if(isCb())
-         return new Fraction(Functions.cbrt(num), Functions.cbrt(denom));
-      return new Fraction();
+         return Optional.of(new Fraction(Functions.cbrt(num), Functions.cbrt(denom)));
+      return Optional.empty();
    }
    public Fraction abs()
    {
-      return new Fraction(num.abs(), denom.abs());
+      return new Fraction(num.abs());
    }
    public boolean isSq()
    {
@@ -137,6 +156,10 @@ public class Fraction
    public boolean isCb()
    {
       return Functions.isCb(num.abs()) && Functions.isCb(denom);
+   }
+   public int hashCode()
+   {
+      return toString().hashCode();
    }
    public boolean equals(Fraction f)
    {
@@ -167,6 +190,10 @@ public class Fraction
       if(f.compareTo(Fraction.ONE) == 0)
          return true;
       return divisible(num, f.num) || divisible(denom, f.denom);
+   }
+   public boolean isWhole()
+   {
+      return denom.compareTo(BigInteger.ONE) == 0;
    }
    
    
@@ -219,5 +246,49 @@ public class Fraction
          if(f[m].equals(d))
             return false;
       return true;
+   }
+
+   /**
+    * Returns the value of this Fraction as an {@code int}, with truncation.
+    *
+    * @return the numeric value represented by this object after conversion
+    * to type {@code int}.
+    */
+   @Override
+   public int intValue() {
+      return 0;
+   }
+
+   /**
+    * Returns the value of the specified number as a {@code long}.
+    *
+    * @return the numeric value represented by this object after conversion
+    * to type {@code long}.
+    */
+   @Override
+   public long longValue() {
+      return 0;
+   }
+
+   /**
+    * Returns the value of the specified number as a {@code float}.
+    *
+    * @return the numeric value represented by this object after conversion
+    * to type {@code float}.
+    */
+   @Override
+   public float floatValue() {
+      return 0;
+   }
+
+   /**
+    * Returns the value of the specified number as a {@code double}.
+    *
+    * @return the numeric value represented by this object after conversion
+    * to type {@code double}.
+    */
+   @Override
+   public double doubleValue() {
+      return 0;
    }
 }

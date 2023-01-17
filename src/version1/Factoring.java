@@ -1,3 +1,5 @@
+package version1;
+
 import javax.swing.JOptionPane;
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -7,7 +9,7 @@ import java.util.Arrays;
 * @author Nathan Harbison
 */
 
-public class Factoring
+public final class Factoring
 {
    public static final String[] NULLSTR = {""};
    private static final String WITH_DELIMITER = "(?=%1$s)";
@@ -32,6 +34,7 @@ public class Factoring
             factor(quad);
          } catch(Exception e) {
             JOptionPane.showMessageDialog(null, "Could not interpret the given expression.");
+            e.printStackTrace();
          }
       }
    }
@@ -49,7 +52,6 @@ public class Factoring
          coefficients[x] = coefficients(s[x], variables[x]);
       
       String factor = getFactor(coefficients, variables);
-      System.out.println(Arrays.toString(fullArr));
       
       String print = quad;
       //based on what the variables are, determine what should be used for factoring
@@ -100,7 +102,6 @@ public class Factoring
                s = print.split(String.format(WITH_DELIMITER, "\\("));
             }
          }
-         System.out.println(print);
          JOptionPane.showMessageDialog(null, Scripts.superscript(quad)+" factored is:\n"+Scripts.superscript(print));
       }
    }

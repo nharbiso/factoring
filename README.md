@@ -1,6 +1,6 @@
 # Factoring Project
 
-This project determines the nature of any given multivariable expression and factors into its component parts! I first completed a version of this implementation (`src/version1`) with my first introduction to computer science during my freshman year of high school. Upon coursework on data structures sophomore year, I then created a new documented version of the project (`src/version2`) utilizing my new knowledge.
+This project determines the nature of any given multivariable expression and factors into its component parts! I first completed a version of this implementation (`src/version1`) with my first introduction to computer science during my freshman year of high school. Upon coursework on data structures sophomore year, I then created a new documented version of the project (`src/version3`) utilizing my new knowledge.
 
 To run the project, navigate to and run the `Factoring.java` file of either respective version. A display will pop up requesting an expression as input to be factored. Expressions must be entered as terms separated a plus or minus sign (without any space). Terms start with their numerical coefficient (if not 1) following by alphabetic characters with succeeding carats and numbers, representing variables to some power. Hence, an example valid input expression is '3x^2z^43-y^7+72'.
 

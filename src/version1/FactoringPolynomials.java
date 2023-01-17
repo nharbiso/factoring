@@ -1,3 +1,5 @@
+package version1;
+
 public class FactoringPolynomials
 {
    private static Fraction[] div;

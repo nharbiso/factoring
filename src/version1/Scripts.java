@@ -8,7 +8,7 @@ public class Scripts
       while(index != -1)
       {
          int tmp = index + 1;
-         while(Character.isDigit(str.charAt(tmp)))
+         while(tmp < str.length() && Character.isDigit(str.charAt(tmp)))
             tmp++;
          
          String[] s = {str.substring(0, index), str.substring(index + 1, tmp), str.substring(tmp, str.length())};

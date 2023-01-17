@@ -2,18 +2,25 @@ package version2.utilities;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.IntFunction;
 
 /**
  * Class representing a term of an expression,
  * with integer coefficients and variables
  * @author Nathan Harbison
  */
-public class Term
-{
+public class Term {
     /** Coefficient of the term */
-    private int coefficient;
+    private final int coefficient;
     /** Map between each variable in the term and its power */
     private final Map<Character, Integer> vars;
+
+    private final static String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+    // ---------------------------------------------------------------------------------------
+    // Constructors
+
     /**
      *  Creates a new Term object with a given coefficient and variables
      *  expressed in a String object
@@ -25,163 +32,179 @@ public class Term
         char[] chars = varStr.toCharArray();
         this.vars = new HashMap<>();
         for(int i = 0; i < chars.length; i++) {
-            if (Character.isLetter(chars[i])) {
+            if(Character.isLetter(chars[i])) {
                 // power of one - no caret character
-                if (i + 1 == chars.length || chars[i + 1] != '^')
+                if(i + 1 == chars.length || chars[i + 1] != '^')
                     this.vars.put(chars[i], 1);
                 // caret character present - any greater integer power
                 else {
                     int endOfPower = i + 2; // find end of the integer power in string
                     while (endOfPower < chars.length && Character.isDigit(chars[endOfPower]))
                         endOfPower++;
+                    String powerStr = varStr.substring(i + 2, endOfPower);
                     try {
-                        int power = Integer.parseInt(varStr.substring(i + 2, endOfPower));
+                        int power = Integer.parseInt(powerStr);
                         this.vars.put(chars[i], power);
                     } catch(NumberFormatException ex) {
-                        throw new IllegalArgumentException("Error: Non-integer power given as a variable");
+                        throw new IllegalArgumentException("Error: Non-integer power given as a variable:" + powerStr);
                     }
 
                     i = endOfPower - 1; // for loop addition will increase i to endOfPower
                 }
             } else
-                throw new IllegalArgumentException("Error: Non-alphabetic character used as a variable");
+                throw new IllegalArgumentException("Error: Non-alphabetic character used as a variable: " + chars[i]);
         }
     }
+
     /**
      *  Creates a new Term object with a given coefficient and variables
      *  @param coeff coefficient of the term
      *  @param vars variables of the term
      */
-    public Term(int coeff, Map<Character, Integer> vars)
-    {
+    public Term(int coeff, Map<Character, Integer> vars) {
         this.coefficient = coeff;
-        this.vars = vars;
+        this.vars = new HashMap<>(vars);
     }
-    /**
-     *  Modifies the term's coefficient to the given value
-     *  @param x the new coefficient
-     */
-    public void setCoefficient(int x)
-    {
-        coefficient = x;
-    }
+
+    // ---------------------------------------------------------------------------------------
+    // Accessors and modifiers
+
     /**
      *  Gets and returns the term's coefficient
      *  @return the coefficient of the term
      */
-    public int getCoef()
-    {
-        return coefficient;
+    public int getCoefficient() {
+        return this.coefficient;
     }
+
+    /**
+     * Modifies the coefficient to the given value
+     * @param coeff the new coefficient of the term
+     */
+    public void setCoefficient(int coeff) {
+        this.coefficient = coeff;
+    }
+
     /**
      *  Finds and returns the power for a given variable
-     *  @param v the variable whose power is being found
+     *  @param var the variable whose power is being found
      *  @return the power of the given variable
+     *  @throws IllegalArgumentException if given an invalid non-alphabetic variable
      */
-    public int getPow(Character v)
-    {
+    public int getPower(Character var) {
+        if(!Character.isLetter(var))
+            throw new IllegalArgumentException("Error: Invalid non-alphabetic variable " + var);
         try {
-            return vars.get(v);
-        } catch(NullPointerException e) {
+            return this.vars.get(var);
+        } catch(NullPointerException ex) {
+            // if variable not in map, it has a power of 0 (e.g. x = xz^0)
             return 0;
         }
     }
+
     /**
-     *  Sets the power for a specific variable in the term
-     *  @param v the character whose power is being changed
-     *  @param pow the new power of the variable
-     */
-    public void setPow(Character v, int pow)
-    {
-        vars.put(v, pow);
-    }
-    /**
-     *  Gets and returns the term's map of variables to their powers
+     *  Gets and returns the term's map of variables to their powers. Modifying this map
+     *  modifies the corresponding term.
      *  @return the variables, mapped to their powers
      */
-    public Map<Character, Integer> getVariables()
-    {
-        return vars;
+    public Map<Character, Integer> getVariables() {
+        return this.vars;
     }
+
+    // ---------------------------------------------------------------------------------------
+    // To-string and equality methods
+
     /**
-     *  Returns the string expression of a collection of variables based on a
-     *  given map connecting each variable to its power
-     *  @param vars map representing each variable and its power
-     *  @return string expression based on the given map
+     *  Returns the string expression of the variables in the given term
+     *  @return string expression of the term's variables
      */
-    public static String getVariables(Map<Character, Integer> vars)
-    {
-        String fin = "";
-        for(char c : vars.keySet())
-            fin += getOneVariable(c, vars.get(c));
-        return fin;
+    public String getVarStr() {
+        String varStr = "";
+        for(char var : ALPHABET.toCharArray())
+            if(this.vars.containsKey(var))
+                varStr += getOneVariable(var, this.vars.get(var));
+        return varStr;
     }
     /**
      *  Returns the string expression of a variable and its power
      *  @param var character representing the variable
      *  @param pow the power to which the variable is raised
      *  @return string expression of the variable and its power
+     *  @throws IllegalArgumentException if given an invalid non-alphabetic variable
      */
-    public static String getOneVariable(char var, int pow)
-    {
+    public static String getOneVariable(char var, int pow) {
+        if(!Character.isLetter(var))
+            throw new IllegalArgumentException("Error: Invalid non-alphabetic variable " + var);
+
         if(pow == 1)
-            return var + "";
+            return Character.toString(var);
         if(pow == 0)
             return "";
         return var + "^" + pow;
     }
     /**
-     *  Returns the string expression of a given term to
-     *  to be placed at the beginning of a string expression
-     *  @param t the term to be interpreted
+     *  Returns the string form of the given term for placement at
+     *  the beginning of an expression (without a space or plus sign)
      *  @return a string representation of the term
      */
-    public static String frontString(Term t)
-    {
-        return t.toString();
+    public String frontStr() {
+        if(this.getCoefficient() == 0)
+            return "";
+        String termStr = this.coefficient + this.getVarStr();
+        if(Math.abs(coefficient) == 1 && !termStr.equals("1") && !termStr.equals("-1"))
+            termStr = termStr.replaceAll("1", "");
+        return termStr;
     }
     /**
-     *  Returns the string expression of a given term to
-     *  to be placed in the middle or end of a string expression
-     *  @param t the term to be interpreted
+     *  Returns the string form of the given term for placement at
+     *  the middle or end of an expression (with a space and plus/minus signs)
      *  @return a string representation of the term
      */
-    public static String midString(Term t)
-    {
-        if(t.getCoef() == 0)
+    public String middleStr() {
+        if(this.getCoefficient() == 0)
             return "";
-        String coeff, vars = getVariables(t.getVariables());
-        if(t.getCoef() > 0)
-            coeff = " + " + t.getCoef();
+        String coeff;
+        String vars = getVarStr();
+        if(getCoefficient() > 0)
+            coeff = " + " + getCoefficient();
         else
-            coeff = " - " + Math.abs(t.getCoef());
-        if(Math.abs(t.getCoef()) == 1 && !vars.isEmpty())
+            coeff = " - " + Math.abs(getCoefficient());
+        if(Math.abs(getCoefficient()) == 1 && !vars.isEmpty())
             coeff = coeff.replaceAll("1", "");
         return coeff + vars;
     }
+
     /**
-     *  Determines whether or not the term is equal to another term (if
-     *  the object given is not an term, the method will return false)
-     *  @return if the terms are exactly alike
+     *  Determines if equality between the term and another object,
+     *  returning true if both are identical terms
+     *  @return if the object is an identical term
      */
-    public boolean equals(Object o)
-    {
-        if(o instanceof Term)
-            return toString().equals(((Term) o).toString());
+    @Override
+    public boolean equals(Object obj) {
+        if(this == obj)
+            return true;
+        if(obj instanceof Term otherTerm) {
+            return this.coefficient == otherTerm.coefficient && this.vars.equals(otherTerm.vars);
+        }
         return false;
     }
+
+    /**
+     * Hashes the given term
+     * @return a hash code for the given term
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.coefficient, this.vars);
+    }
+
     /**
      *  Returns a string value of this term, represented by
      *  its coefficient and the map of its variables to their powers
      *  @return a string expression of this term
      */
-    public String toString()
-    {
-        if(getCoef() == 0)
-            return "";
-        String s = coefficient + getVariables(vars);
-        if(Math.abs(coefficient) == 1 && !s.equals("1") && !s.equals("-1"))
-            s = s.replaceAll("1", "");
-        return s;
+    @Override
+    public String toString() {
+        return this.frontStr();
     }
 }

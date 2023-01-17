@@ -79,29 +79,12 @@ public class Functions
       }
       return factors;
    }
-   public static BigInteger gcd(BigInteger x, BigInteger y)
-   {
-      if(x.compareTo(BigInteger.ZERO) == 0)
-         return y;
-      if(y.compareTo(BigInteger.ZERO) == 0)
-         return x;
-      if(x.compareTo(y) > 0)
-         return gcd(y, x.remainder(y));
-      return gcd(x, y.remainder(x));
-   }
-   public static BigInteger lcm(BigInteger x, BigInteger y)
-   {
-      return x.multiply(y).divide(gcd(x, y));
-   }
-   
-   public static int polygcd(int x, int y)
-   {
-      if(x < 0)
-         return -1 * gcd(Math.abs(x), Math.abs(y));
-      return gcd(Math.abs(x), Math.abs(y));
-   }
+
    public static int gcd(int x, int y)
    {
+      x = Math.abs(x);
+      y = Math.abs(y);
+
       if(x == 0)
          return y;
       if(y == 0)
@@ -110,10 +93,22 @@ public class Functions
          return gcd(y, x % y);
       return gcd(x, y % x);
    }
+
+   public static int gcd(List<Integer> nums) {
+      if(nums.size() == 0)
+         throw new IllegalArgumentException("Error: cannot find the gcd of an empty list.");
+      int gcd = 0;
+      for(int num : nums) {
+         gcd = gcd(num, gcd);
+      }
+      return gcd;
+   }
+
    public static int lcm(int x, int y)
    {
       return x * y / gcd(x, y);
    }
+
    /**
    *  Determines if an integer is a perfect square
    *  @param x the integer to be processed
@@ -124,6 +119,7 @@ public class Functions
       double input = (double) x;
       return input == Math.pow((int)Math.sqrt(input), 2);
    }
+
    /**
    *  Determines if an integer is a perfect cube
    *  @param x the integer to be processed
@@ -134,6 +130,7 @@ public class Functions
       double input = (double) x;
       return input == Math.pow((int)Math.cbrt(input), 3);
    }
+
    /**
    * Determines if an integer is a power of 2, or
    * can be written as 2^n for some integer n

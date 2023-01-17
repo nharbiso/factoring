@@ -4,18 +4,14 @@ import version2.utilities.Functions;
 
 import java.math.*;
 
-public class Fraction
+public class Fraction extends Number
 {
-   private BigInteger num, denom;
+   private final BigInteger numerator;
+   private final BigInteger denominator;
    private static Fraction[] nullArr = {new Fraction()};
    public static Fraction ONE = new Fraction(1, 1);
    public static Fraction NEGONE = new Fraction(-1, 1);
    public static Fraction ZERO = new Fraction(0, 1);
-   public Fraction()
-   {
-      num = BigInteger.ZERO;
-      denom = BigInteger.ZERO;
-   }
    public Fraction(BigInteger x)
    {
       this(x, BigInteger.ONE);
@@ -69,11 +65,11 @@ public class Fraction
    {
       this(f1.num.multiply(f2.denom), f2.num.multiply(f1.denom));
    }
-   public BigInteger getNum()
+   public BigInteger getNumerator()
    {
       return num;
    }
-   public BigInteger getDenom()
+   public BigInteger getDenominator()
    {
       return denom;
    }
@@ -252,5 +248,49 @@ public class Fraction
          if(f[m].equals(d))
             return false;
       return true;
+   }
+
+   /**
+    * Returns the value of this Fraction as an {@code int}, with truncation.
+    *
+    * @return the numeric value represented by this object after conversion
+    * to type {@code int}.
+    */
+   @Override
+   public int intValue() {
+      return 0;
+   }
+
+   /**
+    * Returns the value of the specified number as a {@code long}.
+    *
+    * @return the numeric value represented by this object after conversion
+    * to type {@code long}.
+    */
+   @Override
+   public long longValue() {
+      return 0;
+   }
+
+   /**
+    * Returns the value of the specified number as a {@code float}.
+    *
+    * @return the numeric value represented by this object after conversion
+    * to type {@code float}.
+    */
+   @Override
+   public float floatValue() {
+      return 0;
+   }
+
+   /**
+    * Returns the value of the specified number as a {@code double}.
+    *
+    * @return the numeric value represented by this object after conversion
+    * to type {@code double}.
+    */
+   @Override
+   public double doubleValue() {
+      return 0;
    }
 }

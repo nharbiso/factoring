@@ -211,7 +211,7 @@ public class Term {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(this.coefficient, this.vars);
+        return Objects.hash(this.toString());
     }
 
     /**

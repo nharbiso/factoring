@@ -315,12 +315,8 @@ public class Expression {
       if(this == obj)
          return true;
       if(obj instanceof Expression otherExp) {
-         System.out.println(this.terms + " " + otherExp.terms);
-         System.out.println(this.terms.get(0).equals(otherExp.terms.get(0)));
-         System.out.println(this.terms.get(1).equals(otherExp.terms.get(1)));
          Set<Term> termsNoOrder1 = new HashSet<>(this.terms);
          Set<Term> termsNoOrder2 = new HashSet<>(otherExp.terms);
-         System.out.println("final result: " + termsNoOrder1.equals(termsNoOrder2));
          return termsNoOrder1.equals(termsNoOrder2);
       }
       return false;

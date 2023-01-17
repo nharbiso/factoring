@@ -200,8 +200,6 @@ public class Term {
         if(this == obj)
             return true;
         if(obj instanceof Term otherTerm) {
-            System.out.println("Coeff: " + this.coefficient + ", vars: " + this.vars);
-            System.out.println("Coeff: " + otherTerm.coefficient + ", vars: " + otherTerm.vars);
             return this.toString().equals(otherTerm.toString());
         }
         return false;

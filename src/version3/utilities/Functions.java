@@ -10,7 +10,7 @@ public class Functions
       BigInteger sqrt = sqrt(b);
       return b.equals(sqrt.multiply(sqrt));
    }
-   public static BigInteger sqrt(BigInteger A) 
+   public static BigInteger sqrt(BigInteger A)
    {
       BigInteger a = BigInteger.ONE, b = A.shiftRight(5).add(BigInteger.valueOf(8));
       while((b.compareTo(a)) >= 0)
@@ -170,7 +170,7 @@ public class Functions
     * @return a random item from the set
     * @param <T> the class of the items within the given set
     */
-   public static <T> T getItem(Set<T> set) {
+   public static <T> T getItemFromSet(Set<T> set) {
       Iterator<T> iter = set.iterator();
       if(!iter.hasNext())
          throw new IllegalArgumentException("Error: cannot get an item from an empty set.");

@@ -41,6 +41,7 @@ public class FactoringQuartics
          rCoef[2] = coef[3].add(coef[1].pow(3).multiply(new Fraction("1/8"))).subtract(coef[1].multiply(coef[2]).multiply(new Fraction("1/2")));
          rCoef[3] = coef[4].subtract(coef[1].pow(4).multiply(new Fraction("3/256"))).add(coef[1].pow(2).multiply(coef[2]).multiply(new Fraction("1/16"))).subtract(coef[1].multiply(coef[3]).multiply(new Fraction("1/4")));
          reduced = true;
+         System.out.println(Arrays.toString(rCoef));
       }
       else if(coef[1].getNum().compareTo(BigInteger.ZERO) == 0)
          System.arraycopy(coef, 2, rCoef, 1, 3);
@@ -48,6 +49,7 @@ public class FactoringQuartics
       //resolvent = z^3 + 2cz^2 + (c^2 - 4e)z - d^2
       Fraction[] resolvent = {new Fraction(1, 1), rCoef[1].multiply(new Fraction(2)), rCoef[1].pow(2).subtract(rCoef[3].multiply(new Fraction(4))), 
                               rCoef[2].pow(2).inverse()};
+      System.out.println(Arrays.toString(resolvent));
       Optional<Fraction> sqFactor = findResolvSqFactor(resolvent);
       if(sqFactor.isPresent())
          return quadFactors(sqFactor.get(), coef, rCoef, resolvent, reduced, var);

@@ -1,12 +1,10 @@
 package version3.utilities;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Class representing a term of an expression,
- * with integer coefficients and variables
+ * with integer coefficients and variables to integer powers
  * @author Nathan Harbison
  */
 public class Term {
@@ -24,7 +22,8 @@ public class Term {
      *  Creates a new Term object with a given coefficient and variables
      *  expressed in a String object
      *  @param coeff coefficient of the term
-     *  @param varStr the string written representation of the term's variables and powers
+     *  @param varStr the string representation of the term's variables and powers
+     *  @throws IllegalArgumentException if varStr is incorrectly formatted
      */
     public Term(int coeff, String varStr) {
         this.coefficient = coeff;
@@ -32,7 +31,7 @@ public class Term {
         this.vars = new HashMap<>();
         for(int i = 0; i < chars.length; i++) {
             if(Character.isLetter(chars[i])) {
-                // power of one - no caret character
+                // power of one - no caret character after
                 if(i + 1 == chars.length || chars[i + 1] != '^')
                     this.vars.put(chars[i], 1);
                 // caret character present - any greater integer power
@@ -101,30 +100,32 @@ public class Term {
     public int getPower(Character var) {
         if(!Character.isLetter(var))
             throw new IllegalArgumentException("Error: Invalid non-alphabetic variable " + var);
-        try {
-            return this.vars.get(var);
-        } catch(NullPointerException ex) {
-            // if variable not in map, it has a power of 0 (e.g. x = xz^0)
-            return 0;
-        }
+        return this.vars.getOrDefault(var, 0);
     }
 
     /**
      *  Sets the power for a specific variable in the term
      *  @param var the variable whose power is being changed
      *  @param power the new power of the variable
+     *  @throws IllegalArgumentException if given an invalid power (i.e. negative)
      */
     public void setPower(char var, int power) {
-        this.vars.put(var, power);
+        if(power < 0) {
+            throw new IllegalArgumentException("Invalid power: must be a non-negative integer.");
+        }
+        else if(power == 0) {
+            this.vars.remove(var);
+        } else {
+            this.vars.put(var, power);
+        }
     }
 
     /**
-     *  Gets and returns the term's map of variables to their powers. Modifying this map
-     *  modifies the corresponding term.
+     *  Gets and returns a list of all variables in the term with non-zero powers.
      *  @return the variables, mapped to their powers
      */
-    public Map<Character, Integer> getVariables() {
-        return this.vars;
+    public Set<Character> getVariables() {
+        return new HashSet<>(this.vars.keySet());
     }
 
     // ---------------------------------------------------------------------------------------
@@ -135,12 +136,13 @@ public class Term {
      *  @return string expression of the term's variables
      */
     public String getVarStr() {
-        String varStr = "";
+        StringBuilder varStr = new StringBuilder();
         for(char var : ALPHABET.toCharArray())
             if(this.vars.containsKey(var))
-                varStr += getOneVariable(var, this.vars.get(var));
-        return varStr;
+                varStr.append(getOneVariable(var, this.vars.get(var)));
+        return varStr.toString();
     }
+
     /**
      *  Returns the string expression of a variable and its power
      *  @param var character representing the variable
@@ -158,42 +160,43 @@ public class Term {
             return "";
         return var + "^" + pow;
     }
+
     /**
      *  Returns the string form of the given term for placement at
-     *  the beginning of an expression (without a space or plus sign)
+     *  the beginning of an expression (without a starting space or plus sign)
      *  @return a string representation of the term
      */
     public String frontStr() {
         if(this.getCoefficient() == 0)
             return "";
         String termStr = this.coefficient + this.getVarStr();
-        if(Math.abs(coefficient) == 1 && !termStr.equals("1") && !termStr.equals("-1"))
+        if(Math.abs(this.coefficient) == 1 && !this.vars.isEmpty())
             termStr = termStr.replaceAll("1", "");
         return termStr;
     }
+
     /**
      *  Returns the string form of the given term for placement at
      *  the middle or end of an expression (with a space and plus/minus signs)
      *  @return a string representation of the term
      */
     public String middleStr() {
-        if(this.getCoefficient() == 0)
+        if(this.coefficient == 0)
             return "";
         String coeff;
-        String vars = getVarStr();
-        if(getCoefficient() > 0)
-            coeff = " + " + getCoefficient();
+        if(this.coefficient > 0)
+            coeff = " + " + this.coefficient;
         else
-            coeff = " - " + Math.abs(getCoefficient());
-        if(Math.abs(getCoefficient()) == 1 && !vars.isEmpty())
+            coeff = " - " + Math.abs(this.coefficient);
+        if(Math.abs(this.coefficient) == 1 && !this.vars.isEmpty())
             coeff = coeff.replaceAll("1", "");
-        return coeff + vars;
+        return coeff + getVarStr();
     }
 
     /**
-     *  Determines if equality between the term and another object,
+     *  Determines equality between the term and another object,
      *  returning true if both are identical terms
-     *  @return if the object is an identical term
+     *  @return whether the object is an identical term
      */
     @Override
     public boolean equals(Object obj) {

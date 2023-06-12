@@ -25,7 +25,7 @@ public class FactoringPolynomials
       Set<Character> allVars = exp.getAllVars();
       if(allVars.size() != 1)
          throw new IllegalArgumentException("Error: not a polynomial expression with one variable");
-      char var = Functions.getItem(allVars);
+      char var = Functions.getItemFromSet(allVars);
 
       if(exp.size() <= 2)
          return "(" + exp.toString() + ")";

@@ -44,7 +44,7 @@ public class FactoringQuadratics
          }
       }
 
-      char randVar = Functions.getItem(allVars);
+      char randVar = Functions.getItemFromSet(allVars);
 
       if(mid[0] == 0 && Functions.isPowerOf2(exp.getPower(0, randVar)) &&
          Math.log(exp.getPower(0, randVar)) / Math.log(2) > 1 &&
@@ -72,7 +72,7 @@ public class FactoringQuadratics
                Term t2 = exp2.getTerms().get(i);
                t1.setCoefficient(coefs1[i]);
                t2.setCoefficient(coefs2[i]);
-               for(char var : t1.getVariables().keySet())
+               for(char var : t1.getVariables())
                {
                   t1.setPower(var, t1.getPower(var) / 2);
                   t2.setPower(var, t2.getPower(var) / 2);

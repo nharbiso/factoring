@@ -4,7 +4,8 @@ import java.util.*;
 import java.math.BigInteger;
 
 /**
- *  Class representing an expression
+ *  Class representing a mathematical expression consisting of added terms, each
+ *  composed of one or more variables to integer powers and an integer coefficient
  *  @author Nathan Harbison
  */
 public class Expression {
@@ -33,13 +34,13 @@ public class Expression {
     * Instantiates a copy of the given expression.
     */
    public Expression(Expression exp) {
-      this.terms = new ArrayList<>(exp.terms);
+      this(exp.terms);
    }
 
    /**
-    *  Instantiates an expression with the order and coefficients of the given
-    *  list, as a polynomial of the given variable in decreasing power
-    *  @param coeffs a list of the polynomial's coefficients
+    *  Instantiates a polynomial of the given variable, with terms of
+    *  decreasing power and with the given coefficients as in their given order
+    *  @param coeffs a ordered list of the polynomial's coefficients
     *  @param var the variable in the expression
     */
    public Expression(List<Integer> coeffs, char var)
@@ -58,8 +59,8 @@ public class Expression {
    // Modifiers
 
    /**
-    *  Adds a term to the expression, with a given coefficient
-    *  and variables
+    *  Adds a term to the end of expression, with a given
+    *  coefficient and variables
     *  @param term the term to be added
     */
    public void addTerm(Term term) {
@@ -67,9 +68,8 @@ public class Expression {
    }
 
    /**
-    *  Adds a term to the expression, with a given coefficient
-    *  and variables at the specified index in the ordered list of
-    *  the expression's terms
+    *  Adds a term to the expression at the specified index
+    *  in the ordered list of the expression's terms
     *  @param ind the index where the term is to be added
     *  @param term the term to be added
     */
@@ -78,7 +78,7 @@ public class Expression {
    }
 
    /**
-    *  Adds a term to the expression, with a given coefficient
+    *  Adds a term to the end of the expression, with a given coefficient
     *  and variables, with their powers multiplied by a given scalar.
     *  @param coeff coefficient of the term
     *  @param vars a map of the unmodified term's variables to their powers
@@ -132,7 +132,7 @@ public class Expression {
       if(vars.size() != 1)
          return;
 
-      char var = Functions.getItem(vars);
+      char var = Functions.getItemFromSet(vars);
 
       this.orderPolynomial();
 
@@ -167,7 +167,7 @@ public class Expression {
       Set<Character> vars = this.getAllVars();
       if(vars.size() != 1)
          return;
-      char var = Functions.getItem(vars);
+      char var = Functions.getItemFromSet(vars);
 
       // sort in reverse order
       this.terms.sort(Comparator.comparingInt(term -> -1 * term.getPower(var)));
@@ -193,7 +193,8 @@ public class Expression {
    }
 
    /**
-    *  Returns the coefficient for a given term, denoted by its index
+    *  Returns the coefficient for a given term at the given index
+    *  in the expression
     *  @param ind the index of the term
     *  @return the coefficient of the term
     */
@@ -202,7 +203,8 @@ public class Expression {
    }
 
    /**
-    *  Returns a list of coefficients in order of the terms' indices
+    *  Returns a list of coefficients in order of the terms' placement
+    *  in the expression
     *  @return a list of all coefficients
     */
    public List<Integer> getCoefficients() {
@@ -214,16 +216,22 @@ public class Expression {
 
    /**
     *  Finds and returns a map describing the variables and their powers
-    *  for a specific term, denoted by its index in the expression
+    *  for a specific term, as given by its index in the expression
     *  @param ind the index of the term
     *  @return a map mapping variables to their respective powers for the desired term
     */
    public Map<Character, Integer> getVars(int ind) {
-      return new HashMap<>(this.terms.get(ind).getVariables());
+      Term term = this.terms.get(ind);
+      Map<Character, Integer> vars = new HashMap<>();
+      for(Character var : term.getVariables()) {
+         vars.put(var, term.getPower(var));
+      }
+      return vars;
    }
 
    /**
-    *  Returns the power of a variable in a given term, denoted by its index
+    *  Returns the power of a variable in a given term, as given its index
+    *  in the expression
     *  @param ind the index of the term
     *  @param var the variable whose power is desired
     *  @return the coefficient of the term
@@ -236,6 +244,7 @@ public class Expression {
     *  For a non-empty expression, factors out the largest possible term, in terms of its
     *  coefficient and variables' powers, from the given expression, and returns said term.
     *  @return the factor of the expression, as a term object
+    *  @throws IllegalStateException if the expression is empty
     */
    public Term getFactor() {
       if(this.terms.size() == 0)
@@ -258,12 +267,8 @@ public class Expression {
       
       // find variables present in all terms
       Set<Character> varsInAll = new HashSet<>();
-      outer: for(char var : allVars) {
-         for(Term term : terms)
-            if (term.getPower(var) == 0)
-               continue outer;
-         varsInAll.add(var);
-      }
+      for(Term term : terms)
+         varsInAll.addAll(term.getVariables());
 
       // factor out the highest power of variables present in all terms
       Map<Character, Integer> varToPow = new HashMap<>();
@@ -275,12 +280,7 @@ public class Expression {
 
          // divide all terms by the variable to its smallest power present in the expression
          for(Term term : this.terms) {
-            // as minPower is the minimum, newPow >= 0
-            int newPow = term.getPower(var) - minPower;
-            if(newPow > 0)
-               term.getVariables().put(var, term.getPower(var) - minPower);
-            else
-               term.getVariables().remove(var);
+            term.setPower(var, term.getPower(var) - minPower);
          }
          varToPow.put(var, minPower);
       }
@@ -297,7 +297,7 @@ public class Expression {
    {
       Set<Character> vars = new HashSet<>();
       for(Term term : this.terms)
-         vars.addAll(term.getVariables().keySet());
+         vars.addAll(term.getVariables());
       return vars;
    }
 
@@ -305,7 +305,7 @@ public class Expression {
    // To-string and equality methods
 
    /**
-    *  Determines if equality between the expression and another object,
+    *  Determines equality between the expression and another object,
     *  returning true if both are identical expressions, ignoring order
     *  @return if the object is an identical expression, ignoring order
     */
@@ -340,7 +340,7 @@ public class Expression {
    public String toString()
    {
       StringBuilder builder = new StringBuilder();
-      if(size() > 0)
+      if(this.size() > 0)
       {
          builder.append(this.terms.get(0).frontStr());
          for(int i = 1; i < terms.size(); i++)

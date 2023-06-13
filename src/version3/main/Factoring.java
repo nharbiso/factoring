@@ -83,7 +83,7 @@ public class Factoring
          print = FactoringByGrouping.factor(exp);
       
       if(print.substring(1, print.length() - 1).equals(ex) && factor.isEmpty())
-         JOptionPane.showMessageDialog(null, "The expression "+Scripts.superscript(withFrac)+" is not factorable.");
+         JOptionPane.showMessageDialog(null, "The expression "+Scripts.superscriptNum(withFrac)+" is not factorable.");
       else 
       {
          if(!fracLCM.equals(""))
@@ -101,7 +101,7 @@ public class Factoring
                factors = print.split(String.format(WITH_DELIMITER, "\\("));
             }
          }
-         JOptionPane.showMessageDialog(null, Scripts.superscript(withFrac)+" factored is:\n"+Scripts.superscript(factor + print));
+         JOptionPane.showMessageDialog(null, Scripts.superscriptNum(withFrac)+" factored is:\n"+Scripts.superscriptNum(factor + print));
       }
       return factor + print;
    }
@@ -150,7 +150,7 @@ public class Factoring
    {
       BigInteger lcm = BigInteger.ONE;
       for(Fraction c : coef)
-         lcm = lcm.multiply(c.getDenominator()).divide(Functions.gcd(lcm, c.getDenominator()));
+         lcm = lcm.multiply(c.getDenom()).divide(Functions.gcd(lcm, c.getDenom()));
       for(int x = 0; x < coef.length; x++)
          coef[x] = coef[x].multiply(lcm);
       if(lcm.compareTo(BigInteger.ONE) == 0)

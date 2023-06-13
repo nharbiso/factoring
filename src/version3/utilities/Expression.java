@@ -88,10 +88,10 @@ public class Expression {
       Map<Character, Integer> modVars = new HashMap<>(vars);
       for(char var : modVars.keySet()) {
          int power = modVars.get(var);
-         int newPower = scalar.mul(BigInteger.valueOf(power)).toInt();
+         int newPower = scalar.multiply(BigInteger.valueOf(power)).intValue();
          modVars.put(var, newPower);
       }
-      addTerm(new Term(coeff, modVars));
+      this.terms.add(new Term(coeff, modVars));
    }
 
    /**
@@ -100,7 +100,7 @@ public class Expression {
     */
    public void addExpression(Expression exp) {
       for(Term term : exp.terms)
-         addTerm(new Term(term));
+         this.terms.add(new Term(term));
    }
 
    /**
@@ -171,6 +171,30 @@ public class Expression {
 
       // sort in reverse order
       this.terms.sort(Comparator.comparingInt(term -> -1 * term.getPower(var)));
+   }
+
+   /**
+    * Evaluates the expression using the given integer values for each variable,
+    * as given by the map.
+    * @param values a map of each variable to its integer value for substitution.
+    * @return the evaluation of the expression after substituting the given integer values
+    * for each variable.
+    * @throws IllegalArgumentException if values does not contain an entry for each variable
+    * in the expression.
+    */
+   public int evaluateExpression(Map<Character, Integer> values) {
+      int eval = 0;
+      for(Term term : this.terms) {
+         int termVal = term.getCoefficient();
+         for(char var : term.getVariables()) {
+            if(!values.containsKey(var)) {
+               throw new IllegalArgumentException("Error: given map does not contain variable " + var + "contained in expression.");
+            }
+            termVal *= Math.pow(values.get(var), term.getPower(var));
+         }
+         eval += termVal;
+      }
+      return eval;
    }
 
    // ---------------------------------------------------------------------------------------

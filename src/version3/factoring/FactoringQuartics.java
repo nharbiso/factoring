@@ -35,7 +35,7 @@ public class FactoringQuartics
       boolean reduced = false;
       Fraction rCoef[] = new Fraction[4];
       rCoef[0] = coef[0];
-      if(coef[1].getNum().compareTo(BigInteger.ZERO) != 0)
+      if(coef[1].compareTo(Fraction.ZERO) != 0)
       {
          rCoef[1] = coef[2].subtract(coef[1].pow(2).multiply(new Fraction("3/8")));
          rCoef[2] = coef[3].add(coef[1].pow(3).multiply(new Fraction("1/8"))).subtract(coef[1].multiply(coef[2]).multiply(new Fraction("1/2")));
@@ -43,7 +43,7 @@ public class FactoringQuartics
          reduced = true;
          System.out.println(Arrays.toString(rCoef));
       }
-      else if(coef[1].getNum().compareTo(BigInteger.ZERO) == 0)
+      else if(coef[1].compareTo(Fraction.ZERO) == 0)
          System.arraycopy(coef, 2, rCoef, 1, 3);
       
       //resolvent = z^3 + 2cz^2 + (c^2 - 4e)z - d^2
@@ -64,12 +64,12 @@ public class FactoringQuartics
    */
    private static Optional<Fraction> findResolvSqFactor(Fraction[] resolvent)
    {
-      Fraction[] f = resolvent[3].findSqFactors();
-      for(int x = 0; x < f.length; x++)
+      List<Fraction> sqFactors = resolvent[3].findSqFactors();
+      for(Fraction sqFactor : sqFactors)
       {
-         Fraction sum = f[x].pow(3).add(f[x].pow(2).multiply(resolvent[1])).add(f[x].multiply(resolvent[2])).add(resolvent[3]);
-         if(sum.getNum().compareTo(BigInteger.ZERO) == 0)
-            return Optional.of(f[x]);
+         Fraction sum = sqFactor.pow(3).add(sqFactor.pow(2).multiply(resolvent[1])).add(sqFactor.multiply(resolvent[2])).add(resolvent[3]);
+         if(sum.compareTo(Fraction.ZERO) == 0)
+            return Optional.of(sqFactor);
       }
       return Optional.empty();
    }
@@ -86,20 +86,20 @@ public class FactoringQuartics
    */
    private static String quadFactors(Fraction fac, Fraction[] coef, Fraction[] rCoef, Fraction[] resolvent, boolean reduced, char var)
    {
-      Fraction h = fac.sqrt().get();
+      Fraction h = fac.nthRoot(2).get();
       Fraction k, kpr;
-      if(h.getNum().compareTo(BigInteger.ZERO) != 0)
+      if(h.compareTo(Fraction.ZERO) != 0)
       {
-         k = new Fraction(BigInteger.ONE, h.multiply(new Fraction(2))).multiply(h.pow(3).add(h.multiply(rCoef[1])).subtract(rCoef[2]));
-         kpr = new Fraction(BigInteger.ONE, h.multiply(new Fraction(2))).multiply(h.pow(3).add(h.multiply(rCoef[1])).add(rCoef[2]));
+         k = h.multiply(new Fraction(2)).reciprocal().multiply(h.pow(3).add(h.multiply(rCoef[1])).subtract(rCoef[2]));
+         kpr = h.multiply(new Fraction(2)).reciprocal().multiply(h.pow(3).add(h.multiply(rCoef[1])).add(rCoef[2]));
       }
       else
       {
-         k = rCoef[1].add(resolvent[2].sqrt().get()).multiply(new Fraction("1/2"));
-         kpr = rCoef[1].subtract(resolvent[2].sqrt().get()).multiply(new Fraction("1/2"));
+         k = rCoef[1].add(resolvent[2].nthRoot(2).get()).multiply(new Fraction("1/2"));
+         kpr = rCoef[1].subtract(resolvent[2].nthRoot(2).get()).multiply(new Fraction("1/2"));
       }
-      List<Fraction> factor1 = Arrays.asList(new Fraction[] {new Fraction(1, 1), h, k});
-      List<Fraction> factor2 = Arrays.asList(new Fraction[] {new Fraction(1, 1), h.inverse(), kpr});
+      List<Fraction> factor1 = Arrays.asList(Fraction.ONE, h, k);
+      List<Fraction> factor2 = Arrays.asList(Fraction.ONE, h.inverse(), kpr);
       if(reduced)
       {
          factor1 = transformBack(factor1, coef);
@@ -136,7 +136,7 @@ public class FactoringQuartics
    {
       List<Integer> asInt = new ArrayList<Integer>();
       for(int x = 0; x < frac.size(); x++)
-         asInt.add(frac.get(x).toInt());
+         asInt.add(frac.get(x).intValue());
       return asInt;
    }
 }

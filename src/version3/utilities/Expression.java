@@ -5,18 +5,18 @@ import java.math.BigInteger;
 
 /**
  *  Class representing a mathematical expression consisting of added terms, each
- *  composed of one or more variables to integer powers and an integer coefficient
+ *  composed of one or more variables to integer powers and an integer coefficient.
  *  @author Nathan Harbison
  */
 public class Expression {
-   /** A list of terms representing a given expression */
+   /** A list of terms representing a given expression. */
    private List<Term> terms;
 
    // ---------------------------------------------------------------------------------------
    // Constructors
 
    /**
-    *  Instantiates a blank expression with no terms
+    *  Instantiates a blank expression with no terms.
     */
    public Expression() {
       this.terms = new ArrayList<>();
@@ -39,9 +39,9 @@ public class Expression {
 
    /**
     *  Instantiates a polynomial of the given variable, with terms of
-    *  decreasing power and with the given coefficients as in their given order
-    *  @param coeffs a ordered list of the polynomial's coefficients
-    *  @param var the variable in the expression
+    *  decreasing power and with the given coefficients as in their given order.
+    *  @param coeffs an ordered list of the polynomial's coefficients.
+    *  @param var the variable in the expression.
     */
    public Expression(List<Integer> coeffs, char var)
    {
@@ -60,8 +60,8 @@ public class Expression {
 
    /**
     *  Adds a term to the end of expression, with a given
-    *  coefficient and variables
-    *  @param term the term to be added
+    *  coefficient and variables.
+    *  @param term the term to be added.
     */
    public void addTerm(Term term) {
       this.terms.add(term);
@@ -69,9 +69,9 @@ public class Expression {
 
    /**
     *  Adds a term to the expression at the specified index
-    *  in the ordered list of the expression's terms
-    *  @param ind the index where the term is to be added
-    *  @param term the term to be added
+    *  in the ordered list of the expression's terms.
+    *  @param ind the index where the term is to be added.
+    *  @param term the term to be added.
     */
    public void addTerm(int ind, Term term) {
       this.terms.add(ind, term);
@@ -80,23 +80,23 @@ public class Expression {
    /**
     *  Adds a term to the end of the expression, with a given coefficient
     *  and variables, with their powers multiplied by a given scalar.
-    *  @param coeff coefficient of the term
-    *  @param vars a map of the unmodified term's variables to their powers
-    *  @param scalar modifying scalar of the variables' powers
+    *  @param coeff the coefficient of the term.
+    *  @param vars a map of the unmodified term's variables to their powers.
+    *  @param scalar modifying scalar of the variables' powers.
     */
    public void addReducedTerm(int coeff, Map<Character, Integer> vars, Fraction scalar) {
       Map<Character, Integer> modVars = new HashMap<>(vars);
       for(char var : modVars.keySet()) {
          int power = modVars.get(var);
-         int newPower = scalar.multiply(BigInteger.valueOf(power)).toInt();
+         int newPower = scalar.mul(BigInteger.valueOf(power)).toInt();
          modVars.put(var, newPower);
       }
       addTerm(new Term(coeff, modVars));
    }
 
    /**
-    *  Adds all the terms of given expression to the end of the expression
-    *  @param exp the expression containing the terms to be added
+    *  Adds all the terms of given expression to the end of the expression.
+    *  @param exp the expression containing the terms to be added.
     */
    public void addExpression(Expression exp) {
       for(Term term : exp.terms)
@@ -105,16 +105,16 @@ public class Expression {
 
    /**
     *  Removes the term from the specified index and returns it
-    *  @param ind the index of the term to be removed
-    *  @return the removed term
+    *  @param ind the index of the term to be removed.
+    *  @return the removed term.
     */
    public Term removeTerm(int ind) {
       return this.terms.remove(ind);
    }
 
    /**
-    *  Multiplies all coefficients by a given scalar
-    *  @param scalar the scalar multiplier of the expression
+    *  Multiplies all coefficients by a given scalar.
+    *  @param scalar the scalar multiplier of the expression.
     */
    public void multiply(int scalar) {
       for(Term term : this.terms)
@@ -149,7 +149,7 @@ public class Expression {
    }
 
    /**
-    *  Removes all terms with coefficients of zero in the expression
+    *  Removes all terms with coefficients of zero in the expression.
     */
    public void removeZeroes() {
       List<Term> newTerms = new ArrayList<>();
@@ -177,26 +177,26 @@ public class Expression {
    // Accessors
 
    /**
-    *  Returns the number of terms in the expression
-    *  @return the size of the expression
+    *  Returns the number of terms in the expression.
+    *  @return the size of the expression.
     */
    public int size() {
       return terms.size();
    }
 
    /**
-    *  Returns the list of terms consisting the expression
-    *  @return the list of terms of the expression
+    *  Returns the term at the given index within the expression.
+    *  @return the term at the given index.
     */
-   public List<Term> getTerms() {
-      return new ArrayList<>(this.terms);
+   public Term getTerm(int ind) {
+      return new Term(this.terms.get(ind));
    }
 
    /**
     *  Returns the coefficient for a given term at the given index
-    *  in the expression
-    *  @param ind the index of the term
-    *  @return the coefficient of the term
+    *  in the expression.
+    *  @param ind the index of the term.
+    *  @return the coefficient of the term.
     */
    public int getCoefficient(int ind) {
       return this.terms.get(ind).getCoefficient();
@@ -204,8 +204,8 @@ public class Expression {
 
    /**
     *  Returns a list of coefficients in order of the terms' placement
-    *  in the expression
-    *  @return a list of all coefficients
+    *  in the expression.
+    *  @return a list of all coefficients.
     */
    public List<Integer> getCoefficients() {
       List<Integer> coefs = new ArrayList<>();
@@ -216,9 +216,9 @@ public class Expression {
 
    /**
     *  Finds and returns a map describing the variables and their powers
-    *  for a specific term, as given by its index in the expression
-    *  @param ind the index of the term
-    *  @return a map mapping variables to their respective powers for the desired term
+    *  for a specific term, as given by its index in the expression.
+    *  @param ind the index of the term.
+    *  @return a map mapping variables to their respective powers for the desired term.
     */
    public Map<Character, Integer> getVars(int ind) {
       Term term = this.terms.get(ind);
@@ -231,10 +231,10 @@ public class Expression {
 
    /**
     *  Returns the power of a variable in a given term, as given its index
-    *  in the expression
-    *  @param ind the index of the term
-    *  @param var the variable whose power is desired
-    *  @return the coefficient of the term
+    *  in the expression.
+    *  @param ind the index of the term.
+    *  @param var the variable whose power is desired.
+    *  @return the coefficient of the term.
     */
    public int getPower(int ind, char var) {
       return this.terms.get(ind).getPower(var);
@@ -243,8 +243,8 @@ public class Expression {
    /**
     *  For a non-empty expression, factors out the largest possible term, in terms of its
     *  coefficient and variables' powers, from the given expression, and returns said term.
-    *  @return the factor of the expression, as a term object
-    *  @throws IllegalStateException if the expression is empty
+    *  @return the factor of the expression, as a term object.
+    *  @throws IllegalStateException if the expression is empty.
     */
    public Term getFactor() {
       if(this.terms.size() == 0)
@@ -290,8 +290,8 @@ public class Expression {
 
    /**
     *  Creates and returns a set containing all unique
-    *  variables in the expression
-    *  @return a set of characters, each representing a unique variable in the given expression
+    *  variables in the expression.
+    *  @return a set of characters, each representing a unique variable in the given expression.
     */
    public Set<Character> getAllVars()
    {
@@ -306,8 +306,8 @@ public class Expression {
 
    /**
     *  Determines equality between the expression and another object,
-    *  returning true if both are identical expressions, ignoring order
-    *  @return if the object is an identical expression, ignoring order
+    *  returning true if both are identical expressions, ignoring order.
+    *  @return if the object is an identical expression, ignoring order.
     */
    @Override
    public boolean equals(Object obj)
@@ -323,8 +323,8 @@ public class Expression {
    }
 
    /**
-    * Hashes the given expression
-    * @return a hash code for the given expression
+    * Hashes the given expression.
+    * @return a hash code for the given expression.
     */
    @Override
    public int hashCode() {
@@ -333,8 +333,8 @@ public class Expression {
    }
 
    /**
-    *  Returns a string representing the expression
-    *  @return a string representation of the expression
+    *  Returns a string representing the expression.
+    *  @return a string representation of the expression.
     */
    @Override
    public String toString()

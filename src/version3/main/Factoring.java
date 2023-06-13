@@ -59,7 +59,7 @@ public class Factoring
       
       Expression exp = new Expression();
       for(int x = 0; x < coefficients.length; x++)
-         exp.addTerm(new Term(coefficients[x].toInt(), variables[x]));
+         exp.addTerm(new Term(coefficients[x].intValue(), variables[x]));
       String factor = exp.getFactor().toString();
       if((factor.contains("-1") && factor.length() < 3) || (factor.contains("1") && factor.length() < 2))
          factor = factor.replaceAll("1", "");
@@ -136,7 +136,7 @@ public class Factoring
       if(term.equals(""))
          return Fraction.ONE;
       if(term.equals("-"))
-         return Fraction.NEGONE;
+         return Fraction.NEG_ONE;
       return new Fraction(term);
    }
    /**
@@ -150,7 +150,7 @@ public class Factoring
    {
       BigInteger lcm = BigInteger.ONE;
       for(Fraction c : coef)
-         lcm = lcm.multiply(c.getDenom()).divide(Functions.gcd(lcm, c.getDenom()));
+         lcm = lcm.multiply(c.getDenominator()).divide(Functions.gcd(lcm, c.getDenominator()));
       for(int x = 0; x < coef.length; x++)
          coef[x] = coef[x].multiply(lcm);
       if(lcm.compareTo(BigInteger.ONE) == 0)

@@ -127,7 +127,7 @@ public class FactoringPolynomials
       List<Fraction> quotient = new ArrayList<Fraction>();
       for(int x = 0; x < dend.size() - sor.size() + 1; x++)
       {
-         quotient.add(new Fraction(dend.get(x), new BigInteger(sor.get(0) + ""))); 
+         quotient.add(dend.get(x).divide(new BigInteger(sor.get(0) + "")));
          for(int y = x; y < x + sor.size(); y++)
             dend.set(y, dend.get(y).subtract(quotient.get(x).multiply(new Fraction(sor.get(y-x)))));
       }
@@ -135,7 +135,7 @@ public class FactoringPolynomials
       List<Integer> toInt = new ArrayList<Integer>();
       for(int x = 0; x < quotient.size(); x++)
          if(quotient.get(x).isWhole())
-            toInt.add(quotient.get(x).toInt());
+            toInt.add(quotient.get(x).intValue());
          else
             return new Expression();
       for(int x = quotient.size(); x < dend.size(); x++)

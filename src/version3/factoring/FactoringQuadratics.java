@@ -66,10 +66,11 @@ public class FactoringQuadratics
             Expression exp2 = new Expression(exp);
             int[] coefs1 = new int[] {a, b, c};
             int[] coefs2 = new int[] {a, b * -1, c};
-            for(int i = 0; i < exp1.getTerms().size(); i++)
+            // TODO needs to be redone as modifying Term does not modify Expression now
+            for(int i = 0; i < exp1.size(); i++)
             {
-               Term t1 = exp1.getTerms().get(i);
-               Term t2 = exp2.getTerms().get(i);
+               Term t1 = exp1.getTerm(i);
+               Term t2 = exp2.getTerm(i);
                t1.setCoefficient(coefs1[i]);
                t2.setCoefficient(coefs2[i]);
                for(char var : t1.getVariables())

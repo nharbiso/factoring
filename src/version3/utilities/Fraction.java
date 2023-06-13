@@ -1,294 +1,391 @@
 package version3.utilities;
 
 import java.math.*;
-import java.util.Optional;
+import java.text.NumberFormat;
+import java.util.*;
 
-public class Fraction extends Number
+/**
+ * A class based, immutable representation of a rational number, or Fraction.
+ * @author Nathan Harbison
+ */
+public class Fraction extends Number implements Comparable<Fraction>
 {
+   /** The numerator and denominator of the fraction. */
    private BigInteger num, denom;
    private static final Fraction[] nullArr = {new Fraction(0, 1)};
+   /** A fractional representation of the number 1. */
    public static final Fraction ONE = new Fraction(1, 1);
-   public static final Fraction NEGONE = new Fraction(-1, 1);
+   /** A fractional representation of the number -1. */
+   public static final Fraction NEG_ONE = new Fraction(-1, 1);
+   /** A fractional representation of the number 0. */
    public static final Fraction ZERO = new Fraction(0, 1);
-   public Fraction(BigInteger x)
-   {
-      this(x, BigInteger.ONE);
-   }
-   public Fraction(BigInteger x, BigInteger y)
-   {
-      BigInteger gcd = x.abs().gcd(y.abs());
-      if(y.compareTo(BigInteger.ZERO) < 0)
-         gcd = gcd.multiply(new BigInteger("-1"));
-      num = x.divide(gcd);
-      denom = y.divide(gcd);
-   }
-   public Fraction(int xx, int yy)
-   {
-      this(new BigInteger(""+xx), new BigInteger(""+yy));
-   }
-   public Fraction(int x)
-   {
-      this(new BigInteger(x+""), BigInteger.ONE);
-   }
-   public Fraction(BigInteger[] x)
-   {
-      this(x[0], x[1]);
-   }
-   public Fraction(String str) throws NumberFormatException
-   {
-      BigInteger x, y;
-      if(str.contains("/"))
-      {
-         x = new BigInteger(str.substring(0, str.indexOf("/")));
-         y = new BigInteger(str.substring(str.indexOf("/") + 1, str.length()));
-      }
-      else
-      {
-         x = new BigInteger(str);
-         y = BigInteger.ONE;
-      }
-      BigInteger gcd = x.abs().gcd(y.abs());
-      num = x.divide(gcd);
-      denom = y.divide(gcd);
-   }
-   public Fraction(BigInteger x, Fraction f)
-   {
-      this(x.multiply(f.denom), f.num);
-   }
-   public Fraction(Fraction f, BigInteger x)
-   {
-      this(f.num, x.multiply(f.denom));
-   }
-   public Fraction(Fraction f1, Fraction f2)
-   {
-      this(f1.num.multiply(f2.denom), f2.num.multiply(f1.denom));
-   }
-   public BigInteger getNum()
-   {
-      return num;
-   }
-   public BigInteger getDenom()
-   {
-      return denom;
-   }
-   public void setNum(BigInteger x)
-   {
-      num = x;
-   }
-   public void setDenom(BigInteger x)
-   {
-      denom = x;
-   }
-   public String toString()
-   {
-      if(denom.compareTo(BigInteger.ONE) != 0)
-         return num.toString()+"/"+denom.toString();
-      return num.toString();
-   }
-   public int toInt()
-   {
-      if(isWhole())
-         return num.intValue();
-      return (int) toDecimal();
-   }
-   public double toDecimal()
-   {
-      return new BigDecimal(num).divide(new BigDecimal(denom), 100, RoundingMode.HALF_UP).doubleValue();
-   }
-   
-   public Fraction add(Fraction f)
-   {
-      BigInteger newDenom = denom.multiply(f.denom).divide(denom.gcd(f.denom));
-      return new Fraction(num.multiply(newDenom.divide(denom)).add(f.num.multiply(newDenom.divide(f.denom))), newDenom);
-   }
-   public Fraction subtract(Fraction f)
-   {
-      return add(f.inverse());
-   }
-   public Fraction multiply(Fraction f)
-   {
-      return new Fraction(num.multiply(f.num), denom.multiply(f.denom));
-   }
-   public Fraction multiply(BigInteger i)
-   {
-      return multiply(new Fraction(i));
-   }
-   public Fraction divide(Fraction f)
-   {
-      return multiply(f.reciprocal());
-   }
-   public Fraction divide(BigInteger i)
-   {
-      return multiply(new Fraction(BigInteger.ONE, i));
-   }
-   public Fraction inverse()
-   {
-      return new Fraction(num.multiply(new BigInteger("-1")), denom);
-   }
-   public Fraction reciprocal()
-   {
-      return new Fraction(denom, num);
-   }
-   public Fraction pow(int pow)
-   {
-      return new Fraction(num.pow(pow), denom.pow(pow));
-   } 
-   public Optional<Fraction> sqrt()
-   {
-      if(isSq())
-         return Optional.of(new Fraction(Functions.sqrt(num), Functions.sqrt(denom)));
-      return Optional.empty();
-   }
-   public Optional<Fraction> cbrt()
-   {
-      if(isCb())
-         return Optional.of(new Fraction(Functions.cbrt(num), Functions.cbrt(denom)));
-      return Optional.empty();
-   }
-   public Fraction abs()
-   {
-      return new Fraction(num.abs());
-   }
-   public boolean isSq()
-   {
-      return Functions.isSq(num.abs()) && Functions.isSq(denom);
-   }
-   public boolean isCb()
-   {
-      return Functions.isCb(num.abs()) && Functions.isCb(denom);
-   }
-   public int hashCode()
-   {
-      return toString().hashCode();
-   }
-   public boolean equals(Fraction f)
-   {
-      return num.compareTo(f.num) == 0 && denom.compareTo(f.denom) == 0;
-   }
-   public int compareTo(Fraction f)
-   {
-      double d = subtract(f).toDecimal();
-      if(d < 0)
-         return -1;
-      if(d > 0)
-         return 1;
-      return 0;
-   }
-   
-   public Fraction[] findFactors()
-   {
-      return toArray(Functions.findFactors(num.abs()), Functions.findFactors(denom));
-   }
-   public Fraction[] findSqFactors()
-   {
-      if(!isSq())
-         return nullArr;
-      return toArray(square(Functions.findFactors(Functions.sqrt(num.abs()))), square(Functions.findFactors(Functions.sqrt(denom))));
-   }
-   public boolean isFactor(Fraction f)
-   {
-      if(f.compareTo(Fraction.ONE) == 0)
-         return true;
-      return divisible(num, f.num) || divisible(denom, f.denom);
-   }
-   public boolean isWhole()
-   {
-      return denom.compareTo(BigInteger.ONE) == 0;
-   }
-   
-   
-   private boolean divisible(BigInteger b, BigInteger c)
-   {
-      return new BigDecimal(b).divide(new BigDecimal(c), 2, RoundingMode.HALF_UP).stripTrailingZeros().scale() == 0;
-   }
-   private BigInteger[] square(BigInteger[] b)
-   {
-      for(int x = 0; x < b.length; x++)
-         b[x] = b[x].pow(2);
-      return b;
-   }
-   private Fraction[] toArray(BigInteger[] x, BigInteger[] y)
-   {
-      Fraction[] f = new Fraction[x.length * y.length];
-      int length = 0;
-      for(int s = 0; s < x.length; s++)
-         for(int u = 0; u < y.length; u++)
-         {
-            Fraction tmp = new Fraction(x[s], y[u]);
-            if(notPresent(f, tmp, length))
-            {
-               f[length] = tmp;
-               length++;
-            }            
-         }
-      for(int j = 0; j < length - 1; j++)
-      {
-         int maxPos = 0;
-         for(int i = 0; i < length - j; i++)
-            if(f[i].compareTo(f[maxPos]) > 0)
-               maxPos = i;
-         swap(f, maxPos, length - j - 1);
-      }
-      Fraction[] fr = new Fraction[length];
-      for(int m = 0; m < fr.length; m++)
-         fr[m] = f[m];
-      return fr;
-   }
-   private void swap(Fraction[] f, int a, int b)
-   {
-      Fraction tmp = f[a];
-      f[a] = f[b];
-      f[b] = tmp;
-   }
-   private boolean notPresent(Fraction[] f, Fraction d, int length)
-   {
-      for(int m = 0; m < length; m++)
-         if(f[m].equals(d))
-            return false;
-      return true;
+
+   /**
+    * Instantiates a fraction with an integer value given by number.
+    * @param number the value of the fraction.
+    */
+   public Fraction(int number) {
+      this(new BigInteger(number+""), BigInteger.ONE);
    }
 
    /**
-    * Returns the value of this Fraction as an {@code int}, with truncation.
-    *
-    * @return the numeric value represented by this object after conversion
+    * Instantiates a fraction with an integer value given by number.
+    * @param number the value of the fraction.
+    */
+   public Fraction(BigInteger number) {
+      this(number, BigInteger.ONE);
+   }
+
+   /**
+    * Instantiates a fraction with the given numerator and denominator.
+    * @param num the numerator of the fraction.
+    * @param denom the denominator of the fraction.
+    */
+   public Fraction(int num, int denom) {
+      this(new BigInteger(num + ""), new BigInteger(denom + ""));
+   }
+
+   /**
+    * Instantiates a fraction with the given numerator and denominator.
+    * @param num the numerator of the fraction.
+    * @param denom the denominator of the fraction.
+    */
+   public Fraction(BigInteger num, BigInteger denom) {
+      this.num = num;
+      this.denom = denom;
+      simplify();
+   }
+
+   /**
+    * Instantiates a fraction given an appropriately formatted string
+    * representation of one, of the form "<numerator>/<denominator>" or
+    * "<number>" for an integer.
+    * @param frac the string representation of the fraction.
+    * @throws NumberFormatException if the string is formatted incorrectly.
+    */
+   public Fraction(String frac) throws NumberFormatException {
+      try {
+         if (frac.contains("/")) {
+            int slashInd = frac.indexOf("/");
+            this.num = new BigInteger(frac.substring(0, slashInd));
+            this.denom = new BigInteger(frac.substring(slashInd + 1));
+         } else {
+            this.num = new BigInteger(frac);
+            this.denom = BigInteger.ONE;
+         }
+         simplify();
+      } catch(NumberFormatException ex) {
+         throw new NumberFormatException("Error: Incorrectly formatted fraction \"" + frac + "\"");
+      }
+   }
+
+   /**
+    * Returns the numerator of the fraction.
+    * @return the numerator of the fraction.
+    */
+   public BigInteger getNum() {
+      return this.num;
+   }
+
+   /**
+    * Returns the denominator of the fraction.
+    * @return the denominator of the fraction.
+    */
+   public BigInteger getDenom() {
+      return this.denom;
+   }
+
+   // ------------------------------------------------------------------------------
+   // Methods for operating on fractions
+
+   /**
+    * Computes the addition of this fraction and the given fraction and returns the sum
+    * as a new fraction.
+    * @param frac the addend of the operation.
+    * @return a new fraction representing the sum.
+    */
+   public Fraction add(Fraction frac) {
+      return new Fraction(this.num.multiply(frac.denom).add(frac.num.multiply(this.denom)), this.denom.multiply(frac.denom));
+   }
+
+   /**
+    * Computes the subtraction of this fraction and the given fraction and returns the difference
+    * as a new fraction.
+    * @param frac the subtrahend of the operation.
+    * @return a new fraction representing the difference.
+    */
+   public Fraction subtract(Fraction frac) {
+      return new Fraction(this.num.multiply(frac.denom).subtract(frac.num.multiply(this.denom)), this.denom.multiply(frac.denom));
+   }
+
+   /**
+    * Computes the multiplication of this fraction and the given fraction and returns the product
+    * as a new fraction.
+    * @param frac the multiplicand of the operation.
+    * @return a new fraction representing the product.
+    */
+   public Fraction multiply(Fraction frac) {
+      return new Fraction(this.num.multiply(frac.num), this.denom.multiply(frac.denom));
+   }
+
+   /**
+    * Computes the multiplication of this fraction and the given integer and returns the product
+    * as a new fraction.
+    * @param number the integer multiplicand of the operation.
+    * @return a new fraction representing the product.
+    */
+   public Fraction multiply(BigInteger number) {
+      return new Fraction(this.num.multiply(number), this.denom);
+   }
+
+   /**
+    * Computes the division of this fraction and the given fraction and returns the quotient
+    * as a new fraction.
+    * @param frac the divisor of the operation.
+    * @return a new fraction representing the quotient.
+    */
+   public Fraction divide(Fraction frac) {
+      return new Fraction(this.num.multiply(frac.denom), this.denom.multiply(frac.num));
+   }
+
+   /**
+    * Computes the division of this fraction and the given integer and returns the quotient
+    * as a new fraction.
+    * @param number the integer divisor of the operation.
+    * @return a new fraction representing the quotient.
+    */
+   public Fraction divide(BigInteger number) {
+      return new Fraction(this.num, this.denom.multiply(number));
+   }
+
+   /**
+    * Computes and returns the additive inverse of the given fraction.
+    * @return a new fraction representing the additive inverse.
+    */
+   public Fraction inverse() {
+      return new Fraction(this.num.multiply(new BigInteger("-1")), this.denom);
+   }
+
+   /**
+    * Computes and returns the reciprocal of the given fraction.
+    * @return a new fraction representing the reciprocal.
+    */
+   public Fraction reciprocal() {
+      return new Fraction(this.denom, this.num);
+   }
+
+   /**
+    * Computes and returns the fraction raised to the given power, as new fraction.
+    * @param pow the power the fraction is to be raised to.
+    * @return a new fraction representing the fraction raised to the given power.
+    */
+   public Fraction pow(int pow) {
+      return new Fraction(this.num.pow(pow), this.denom.pow(pow));
+   }
+
+   /**
+    * If the fraction is a perfect nth power (i.e. its numerator and denominator are perfect nth powers,
+    * when simplified), then returns a new fraction representing the nth root of the fraction. Otherwise,
+    * the return value is empty.
+    * @return the nth root of the given fraction, if it is a perfect nth power.
+    */
+   public Optional<Fraction> nthRoot(int n)
+   {
+      if(isNthPower(n))
+         return Optional.of(new Fraction(Functions.nthRoot(this.num, n), Functions.nthRoot(this.denom, n)));
+      return Optional.empty();
+   }
+
+   /**
+    * Determines if the fraction is a perfect nth power (i.e. its numerator and denominator are perfect nth powers,
+    * when simplified).
+    * @return whether the fraction is a perfect nth power.
+    */
+   public boolean isNthPower(int n) {
+      return Functions.isNthPower(this.num.abs(), n) && Functions.isNthPower(this.denom, n);
+   }
+
+   /**
+    * Computes and returns the absolute value of the given fraction as a new fraction.
+    * @return the absolute value of the given fraction.
+    */
+   public Fraction abs() {
+      return new Fraction(this.num.abs(), this.denom);
+   }
+
+   /**
+    * Finds all factors of the fraction, or all fractions with a numerator and denominator
+    * that are factors of the fraction's numerator and denominator respectively.
+    * @return a list of factors of the fraction.
+    */
+   public List<Fraction> findFactors()
+   {
+      List<BigInteger> numFactors = Functions.findFactors(this.num.abs());
+      List<BigInteger> denomFactors = Functions.findFactors(this.denom);
+
+      Set<Fraction> factorsSet = new HashSet<>();
+      for(BigInteger numFactor : numFactors)
+         for(BigInteger denomFactor : denomFactors)
+            factorsSet.add(new Fraction(numFactor, denomFactor));
+
+      List<Fraction> factors = new ArrayList<>(factorsSet);
+      Collections.sort(factors);
+      return factors;
+   }
+
+   /**
+    * Finds all factors of the fraction that are perfect squares, or all fractions
+    * with a numerator and denominator that are both perfect squares and are factors
+    * of the fraction's numerator and denominator respectively.
+    * @return a list of perfect square factors of the fraction.
+    */
+   public List<Fraction> findSqFactors()
+   {
+      if(!isNthPower(2)) {
+         return new ArrayList<>();
+      }
+
+      List<BigInteger> numFactors = Functions.findFactors(Functions.nthRoot(this.num.abs(), 2));
+      List<BigInteger> denomFactors = Functions.findFactors(Functions.nthRoot(this.denom, 2));
+
+      Set<Fraction> factorsSet = new HashSet<>();
+      for(BigInteger numFactor : numFactors)
+         for(BigInteger denomFactor : denomFactors)
+            factorsSet.add(new Fraction(numFactor.multiply(numFactor), denomFactor.multiply(denomFactor)));
+
+      List<Fraction> factors = new ArrayList<>(factorsSet);
+      Collections.sort(factors);
+      return factors;
+   }
+
+   /**
+    * Determines if the given fraction is a factor of this fraction, or if the given fraction's
+    * numerator and denominator are factors of this fraction's numerator and denominator, respectively.
+    * @param frac the fraction to be tested as a factor.
+    * @return whether the given fraction is a factor of this fraction.
+    */
+   public boolean isFactor(Fraction frac) {
+      return this.num.mod(frac.num).compareTo(BigInteger.ZERO) == 0
+              && this.denom.mod(frac.denom).compareTo(BigInteger.ZERO) == 0;
+   }
+
+   /**
+    * Determines if the fraction is an integer (that it has a denominator of 1).
+    * @return whether the fraction is an integer.
+    */
+   public boolean isWhole()
+   {
+      return this.denom.compareTo(BigInteger.ONE) == 0;
+   }
+
+
+   // ------------------------------------------------------------------------------
+   // Methods for string conversion, primitive conversion, and equality
+
+   /**
+    * Compares the value of this fraction with the given fraction.
+    * @param frac the fraction to be compared.
+    * @return -1, 0, 1 if the given fraction is numerically less than, equal to, or greater than frac.
+    */
+   @Override
+   public int compareTo(Fraction frac) {
+      BigInteger diff = this.num.multiply(frac.denom).subtract(frac.num.multiply(this.denom));
+      diff = diff.divide(diff.abs());
+      return diff.intValue();
+   }
+
+   /**
+    * Hashes the given fraction.
+    * @return a hash code for the given fraction.
+    */
+   @Override
+   public int hashCode() {
+      return Objects.hash(this.num, this.denom);
+   }
+
+   /**
+    *  Determines equality between the fraction and another object,
+    *  returning true if both are identical fractions.
+    *  @return whether the object is an identical fraction.
+    */
+   @Override
+   public boolean equals(Object obj) {
+      if(this == obj)
+         return true;
+      if(obj instanceof Fraction frac) {
+         return this.num.compareTo(frac.num) == 0 && this.denom.compareTo(frac.denom) == 0;
+      }
+      return false;
+   }
+
+   /**
+    *  Returns a string value of this fraction.
+    *  @return a string expression of this fraction.
+    */
+   @Override
+   public String toString() {
+      if(this.denom.compareTo(BigInteger.ONE) != 0)
+         return this.num.toString() + "/" + this.denom.toString();
+      return this.num.toString();
+   }
+
+   /**
+    * Returns the value of this fraction as an {@code int}, with truncation.
+    * @return the numeric value represented by this fraction after conversion
     * to type {@code int}.
     */
    @Override
    public int intValue() {
-      return 0;
+      if(isWhole())
+         return this.num.intValueExact();
+      return (int) doubleValue();
    }
 
    /**
-    * Returns the value of the specified number as a {@code long}.
-    *
-    * @return the numeric value represented by this object after conversion
+    * Returns the value of this fraction as a {@code long}, with truncation.
+    * @return the numeric value represented by this fraction after conversion
     * to type {@code long}.
     */
    @Override
    public long longValue() {
-      return 0;
+      if(isWhole())
+         return this.num.longValueExact();
+      return (long) doubleValue();
    }
 
    /**
-    * Returns the value of the specified number as a {@code float}.
-    *
-    * @return the numeric value represented by this object after conversion
+    * Returns the value of this fraction as a {@code float}.
+    * @return the numeric value represented by this fraction after conversion
     * to type {@code float}.
     */
    @Override
    public float floatValue() {
-      return 0;
+      return new BigDecimal(this.num).divide(new BigDecimal(this.denom), RoundingMode.HALF_UP).floatValue();
    }
 
    /**
-    * Returns the value of the specified number as a {@code double}.
-    *
-    * @return the numeric value represented by this object after conversion
+    * Returns the value of this fraction as a {@code double}.
+    * @return the numeric value represented by this fraction after conversion
     * to type {@code double}.
     */
    @Override
    public double doubleValue() {
-      return 0;
+      return new BigDecimal(this.num).divide(new BigDecimal(this.denom), RoundingMode.HALF_UP).doubleValue();
+   }
+
+   // ------------------------------------------------------------------------------
+   // Helper methods
+
+   /**
+    * Simplifies the fraction by dividing the numerator and denominator by their
+    * greatest common divisor and making the denominator positive (so the sign of
+    * the fraction is given by the sign of the numerator).
+    */
+   private void simplify() {
+      BigInteger gcd = this.num.abs().gcd(this.denom.abs()); // make num and denom be coprime
+      if(this.denom.compareTo(BigInteger.ZERO) < 0) // make denom is positive
+         gcd = gcd.multiply(new BigInteger("-1"));
+      this.num = this.num.divide(gcd);
+      this.denom = this.denom.divide(gcd);
    }
 }

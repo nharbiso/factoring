@@ -24,9 +24,10 @@ public class Factoring
             break;
          try {
             expStr = expStr.replaceAll("\\s+", ""); // clean up spacing - remove all white space
-            String[] res = factor(expStr);
-            expStr = Scripts.superscriptNum(res[0]);
-            String factored = Scripts.superscriptNum(res[1]);
+            String factored = factor(expStr);
+
+            expStr = Scripts.superscriptNum(expStr);
+            factored = Scripts.superscriptNum(factored);
 
             expStr = expStr.charAt(0) + expStr.substring(1).replaceAll("\\+", " + ").replaceAll("-", " - ");
             if(expStr.equals(factored)) {
@@ -44,11 +45,10 @@ public class Factoring
    /**
     * Factors a given expression and expresses it in a string.
     * @param expStr string of expression to be factored.
-    * @return an 2-length array containing the expression that was factored, after processing, and
-    * the string representation of factored expression.
+    * @return the string representation of factored expression.
     * @throws Exception will throw an exception if the parameters are null or invalidly formatted.
     */
-   public static String[] factor(String expStr) throws Exception {
+   public static String factor(String expStr) throws Exception {
       String[] terms = expStr.split(String.format(WITH_DELIMITER, "\\+|-")); // split expression into its component terms
 
       // finds the substring of each term that represents the variables and their powers
@@ -63,7 +63,7 @@ public class Factoring
 
       // find factor by which to multiply all coefficients to make them whole
       // and use it to make all coefficient whole
-      Optional<String> fracLCM = getLCM(coefficients);
+      BigInteger fracLCM = getLCM(coefficients);
 
       // create expression object from coefficients and variable strings
       Expression exp = new Expression();
@@ -72,9 +72,7 @@ public class Factoring
       Set<Character> allVars = exp.getAllVars();
 
       // factor out any common numerical factors and variables
-      String factor = exp.getFactor().toString();
-      if (factor.equals("-1") || factor.equals("1"))
-         factor = factor.replaceAll("1", "");
+      Term factorTerm = exp.getFactor();
 
       List<Expression> factoredExp = List.of(exp);
       if (exp.size() == 3 && canBeQuadFactored(exp, allVars)) {
@@ -92,23 +90,23 @@ public class Factoring
          factoredExp = FactoringByGrouping.factor(exp);
       }
       
-      if(factoredExp.size() == 1 && factor.isEmpty())
-         return new String[] {expStr, factoredExp.get(0).toString()};
-
-      if(fracLCM.isPresent()) // process original expression to show multiplication by LCM
-         expStr = fracLCM.get() + "(" + expStr + ")";
+      if(factoredExp.size() == 1 && factorTerm.isConstant() && factorTerm.getCoefficient() == 1)
+         return expStr;
 
       // group duplicate terms together
       Map<Expression, Integer> freqs = new HashMap<>();
       for(Expression factorExp : factoredExp) {
-         if(!freqs.containsKey(factorExp)) {
-            freqs.put(factorExp, 1);
-         } else {
-            freqs.put(factorExp, freqs.get(factorExp) + 1);
-         }
+         freqs.putIfAbsent(factorExp, 0);
+         freqs.put(factorExp, freqs.get(factorExp) + 1);
       }
 
-      String factored = factor;
+      // start with initial factored out term, perhaps with rational coefficient
+      String factorCoeff = new Fraction(new BigInteger(factorTerm.getCoefficient()+""), fracLCM).toString();
+      if (factorCoeff.equals("-1") || factorCoeff.equals("1"))
+         factorCoeff = factorCoeff.replaceAll("1", "");
+      String factored = factorCoeff + factorTerm.getVarStr();
+
+      // add other factored out expressions to string
       for(Expression factorExp : factoredExp) {
          if(freqs.containsKey(factorExp)) {
             int freq = freqs.get(factorExp);
@@ -116,8 +114,7 @@ public class Factoring
             freqs.remove(factorExp);
          }
       }
-
-      return new String[] {expStr, factored};
+      return factored;
    }
 
    /**
@@ -165,7 +162,7 @@ public class Factoring
     * coefficients whole when multiplied. If 1, returns nothing; otherwise returns
     * the string representation of the scalar.
     */
-   private static Optional<String> getLCM(Fraction[] coefs) {
+   private static BigInteger getLCM(Fraction[] coefs) {
       List<BigInteger> denoms = new ArrayList<>();
       for(Fraction coef : coefs)
          denoms.add(coef.getDenom());
@@ -174,9 +171,7 @@ public class Factoring
       for(int i = 0; i < coefs.length; i++)
          coefs[i] = coefs[i].multiply(lcm);
 
-      if(lcm.compareTo(BigInteger.ONE) == 0)
-         return Optional.empty();
-      return Optional.of(lcm.toString());
+      return lcm;
    }
    
    /**

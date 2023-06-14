@@ -93,6 +93,14 @@ public class Term {
     }
 
     /**
+     * Determines if the given term is a constant (has no variables).
+     * @return whether the term is a constant.
+     */
+    public boolean isConstant() {
+        return this.vars.isEmpty();
+    }
+
+    /**
      *  Finds and returns the power for a given variable.
      *  @param var the variable whose power is being found.
      *  @return the power of the given variable.

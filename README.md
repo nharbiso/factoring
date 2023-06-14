@@ -6,8 +6,12 @@ To run the project, navigate to and run the `Factoring.java` file of any version
 
 The currently supported factoring methods are:
 - factoring out a common term, such as 51x<sup>8</sup>y<sup>2</sup>-27x<sup>2</sup>y<sup>3</sup>z<sup>14</sup>+42x<sup>7</sup>y = 3x<sup>2</sup>y(17x<sup>6</sup>y-9y<sup>2</sup>z<sup>14</sup>+14x<sup>5</sup>)
-- factoring multivariable binomials, such as 16x<sup>8</sup>y<sup>8</sup>-625z<sup>4</sup> = (4x<sup>4</sup>y<sup>4</sup>+25z<sup>2</sup>)(2x<sup>2</sup>y<sup>2</sup>-5z)(2x<sup>2</sup>y<sup>2</sup>-5z)
+- factoring multivariable binomials, such as 16x<sup>8</sup>y<sup>8</sup>-625z<sup>4</sup> = (4x<sup>4</sup>y<sup>4</sup>+25z<sup>2</sup>)(2x<sup>2</sup>y<sup>2</sup>+5z)(2x<sup>2</sup>y<sup>2</sup>-5z)
 - factoring multivariable expressions by grouping, such as 35x<sup>2</sup>+14xy-15xz-6yz = (5x+2y)(7x-3z)
 - factoring single variable polynomials by the rational root theorem, such as 35x<sup>4</sup>-163x<sup>3</sup>-89x<sup>2</sup>+139x+30 = (x-5)(x+1)(5x+1)(7x-6)
 - factoring multivariable quadratics, such as 3x<sup>2</sup>+xy-14y<sup>2</sup> = (x-2y)(3x+7y)
 - factoring multivariable quartics into unfactorable quadratics, such as 5x<sup>4</sup>+2x<sup>3</sup>+3x<sup>2</sup>-2x+1 = (5x<sup>2</sup>-3x+1)(x<sup>2</sup>+x+1)
+
+Known bugs for v3: 
+- freezes on x^3+x^2+1
+- does not properly print for quadratics, like x^2+2x+1 = (x + 1)(x + ) - appears that variables of power 0 are not being cleared from term's map

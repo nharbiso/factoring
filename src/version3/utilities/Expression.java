@@ -50,7 +50,8 @@ public class Expression {
       {
          int power = coeffs.size() - ind - 1;
          Map<Character, Integer> termVars = new HashMap<>();
-         termVars.put(var, power);
+         if(power > 0)
+            termVars.put(var, power);
          this.terms.add(new Term(coeffs.get(ind), termVars));
       }
    }
@@ -301,6 +302,9 @@ public class Expression {
          int minPower = this.terms.get(0).getPower(var);
          for(int i = 1; i < this.terms.size(); i++)
             minPower = Math.min(minPower, this.terms.get(i).getPower(var));
+
+         if(minPower == 0)
+            continue;
 
          // divide all terms by the variable to its smallest power present in the expression
          for(Term term : this.terms) {

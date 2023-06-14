@@ -14,4 +14,3 @@ The currently supported factoring methods are:
 
 Known bugs for v3: 
 - freezes on x^3+x^2+1
-- does not properly print for quadratics, like x^2+2x+1 = (x + 1)(x + ) - appears that variables of power 0 are not being cleared from term's map

@@ -91,8 +91,6 @@ public class Factoring
          // factor by grouping
          factoredExp = FactoringByGrouping.factor(exp);
       }
-
-      System.out.println("After factoring: " + factoredExp);
       
       if(factoredExp.size() == 1 && factor.isEmpty())
          return new String[] {expStr, factoredExp.get(0).toString()};
@@ -115,6 +113,7 @@ public class Factoring
          if(freqs.containsKey(factorExp)) {
             int freq = freqs.get(factorExp);
             factored += "(" + factorExp.toString() + ")" + (freq == 1 ? "" : "^" + freq);
+            freqs.remove(factorExp);
          }
       }
 

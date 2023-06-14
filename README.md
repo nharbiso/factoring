@@ -12,6 +12,3 @@ The currently supported factoring methods are:
 - factoring multivariable quadratics, such as 3x<sup>2</sup>+xy-14y<sup>2</sup> = (x-2y)(3x+7y)
 - factoring multivariable quartics into unfactorable quadratics, such as 5x<sup>4</sup>+2x<sup>3</sup>+3x<sup>2</sup>-2x+1 = (5x<sup>2</sup>-3x+1)(x<sup>2</sup>+x+1)
 - any of the above with fractional coefficients - the program will multiply all coefficients by the smallest integer possible to make all coefficients whole, and factor from there, such as x<sup>3</sup>+19/3x<sup>2</sup>-194/3x+40 = 1/3(x-5)(x+12)(3x-2)
-
-Known bugs for v3: 
-- freezes on x^3+x^2+1

@@ -25,12 +25,13 @@ public class Factoring
          try {
             expStr = expStr.replaceAll("\\s+", ""); // clean up spacing - remove all white space
             String factored = factor(expStr);
+            boolean factorable = !expStr.equals(factored);
 
+            expStr = expStr.charAt(0) + expStr.substring(1).replaceAll("\\+", " + ").replaceAll("-", " - ");
             expStr = Scripts.superscriptNum(expStr);
             factored = Scripts.superscriptNum(factored);
 
-            expStr = expStr.charAt(0) + expStr.substring(1).replaceAll("\\+", " + ").replaceAll("-", " - ");
-            if(expStr.equals(factored)) {
+            if(!factorable) {
                JOptionPane.showMessageDialog(null, "The expression " + expStr + " is not factorable.");
             } else {
                JOptionPane.showMessageDialog(null, expStr + " factored is:\n" + factored);

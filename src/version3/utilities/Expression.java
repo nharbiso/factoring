@@ -144,6 +144,7 @@ public class Expression {
                Map<Character, Integer> varToPow = new HashMap<>();
                varToPow.put(var, power);
                this.terms.add(i, new Term(0, varToPow));
+               i++;
             }
          }
       }

@@ -4,6 +4,8 @@ import version3.utilities.Expression;
 import version3.utilities.Term;
 import version3.utilities.Functions;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -18,7 +20,7 @@ public class FactoringQuadratics
    *  @param exp the expression to be factored
    *  @return a string representing the factored expression, or the given expression if unfactorable
    */
-   public static String factor(Expression exp)
+   public static List<Expression> factor(Expression exp)
    {
       Set<Character> allVars = exp.getAllVars();
 
@@ -83,9 +85,11 @@ public class FactoringQuadratics
             {
                exp1.addZeroes();
                exp2.addZeroes();
-               return FactoringPolynomials.factor(exp1) + FactoringPolynomials.factor(exp2);
+               List<Expression> factored = FactoringPolynomials.factor(exp1);
+               factored.addAll(FactoringPolynomials.factor(exp2));
+               return factored;
             }
-            return "(" + exp1.toString() + ")(" + exp2.toString() + ")";
+            return new ArrayList<>(List.of(exp1, exp2));
          }
       }
    
@@ -98,8 +102,12 @@ public class FactoringQuadratics
       Expression fac = new Expression();
       fac.addTerm(bi1.getFactor());
       fac.addTerm(bi2.getFactor());
-      if(!bi1.equals(bi2))
-         return "(" + exp.toString() + ")";
-      return FactoringBinomials.factor(bi1) + FactoringBinomials.factor(fac);
+      if(bi1.equals(bi2)) {
+         List<Expression> factored = FactoringBinomials.factor(bi1);
+         factored.addAll(FactoringBinomials.factor(fac));
+         return factored;
+      }
+
+      return new ArrayList<>(List.of(exp));
    }
 }

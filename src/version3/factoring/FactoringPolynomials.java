@@ -20,7 +20,7 @@ public class FactoringPolynomials
    *  @param exp the expression to be factored
    *  @return a string representing the factored expression, or the given expression if unfactorable
    */
-   public static String factor(Expression exp)
+   public static List<Expression> factor(Expression exp)
    {
       Set<Character> allVars = exp.getAllVars();
       if(allVars.size() != 1)
@@ -28,7 +28,7 @@ public class FactoringPolynomials
       char var = Functions.getItemFromSet(allVars);
 
       if(exp.size() <= 2)
-         return "(" + exp.toString() + ")";
+         return new ArrayList<>(List.of(exp));
       if(exp.size() == 3 && exp.getCoefficient(1) == 0)
       {
          exp.removeZeroes();
@@ -53,10 +53,16 @@ public class FactoringPolynomials
             coef.add(posFactor.getNum().multiply(posFactor.getNum()).intValue());
             Expression possCube = new Expression(coef, var);
             Expression newDiv = divide(divided, possCube, var);
-            if(newDiv.size() == 0)
-               return getVar(var, posFactor) + factor(divided);
-            else
-               return getVar(var, posFactor) + "(" + possCube.toString() + ")" + factor(newDiv);
+
+            List<Expression> factored = new ArrayList<>();
+            factored.add(getVar(var, posFactor));
+            if(newDiv.size() == 0) {
+               factored.addAll(factor(divided));
+            } else {
+               factored.add(possCube);
+               factored.addAll(factor(newDiv));
+            }
+            return factored;
          }
       }
       if(exp.getPower(0, var) == 4 && exp.getCoefficient(1) == 0 && exp.getCoefficient(3) == 0)
@@ -69,7 +75,7 @@ public class FactoringPolynomials
       else
       {
          exp.removeZeroes();
-         return "(" + exp.toString() + ")";
+         return new ArrayList<>(List.of(exp));
       }
    }
    /**
@@ -144,19 +150,19 @@ public class FactoringPolynomials
       return new Expression(toInt, var);
    }
    /**
-   *  Returns a string represntation of binomial linear factor
+   *  Returns a string representation of binomial linear factor
    *  of the polynomial
    *  @param var the sole variable in the expression
    *  @param factor the factor of the expression
    *  @return a string representation of the factor
    */
-   private static String getVar(char var, Fraction factor)
+   private static Expression getVar(char var, Fraction factor)
    {
       Expression exp = new Expression();
       Map<Character, Integer> map = new HashMap<Character, Integer>();
       map.put(var, 1);
       exp.addTerm(new Term(factor.getDenom().intValue(), map));
       exp.addTerm(new Term(factor.getNum().intValue() * -1, new HashMap<Character, Integer>()));
-      return "(" + exp.toString() + ")";
+      return exp;
    }
 }

@@ -17,7 +17,7 @@ public class FactoringBinomials
    *  @param exp the expression to be factored
    *  @return a string representing the factored expression, or the given expression if unfactorable
    */
-   public static String factor(Expression exp)
+   public static List<Expression> factor(Expression exp)
    {
       Set<Character> allVars = exp.getAllVars();
 
@@ -29,7 +29,10 @@ public class FactoringBinomials
          Expression exp2 = new Expression();
          exp2.addReducedTerm(exp1.getCoefficient(0), exp.getVars(0), new Fraction("1/2"));
          exp2.addReducedTerm(exp1.getCoefficient(1) * -1, exp.getVars(1), new Fraction("1/2"));
-         return factor(exp1) + factor(exp2);
+
+         List<Expression> factors = factor(exp1);
+         factors.addAll(factor(exp2));
+         return factors;
       }
       else if(areCubes(exp))
       {
@@ -42,20 +45,24 @@ public class FactoringBinomials
          combined.putAll(exp.getVars(1));
          exp2.addReducedTerm(exp1.getCoefficient(0) * exp1.getCoefficient(1) * -1, combined, new Fraction("1/3"));
          exp2.addReducedTerm((int) Math.pow(exp1.getCoefficient(1), 2), exp.getVars(1), new Fraction("2/3"));
-         String exp2AsString = "(" + exp2.toString() + ")";
-         if(allVars.size() == 1)
-         {
+
+         List<Expression> factors = factor(exp1);
+
+         if(allVars.size() == 1) {
             exp2.addZeroes();
-            exp2AsString = FactoringPolynomials.factor(exp2);
+            factors.addAll(FactoringPolynomials.factor(exp2));
+         } else {
+            factors.add(exp2);
          }
-         return factor(exp1) + exp2AsString;
+
+         return factors;
       }
       if(allVars.size() == 1)
       {
          exp.addZeroes();
          return FactoringPolynomials.factor(exp);
       }
-      return "(" + exp.toString() + ")";
+      return new ArrayList<>(List.of(exp));
    }
    /**
    *  Determines if a given expression is a difference of squares

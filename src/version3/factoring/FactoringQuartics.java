@@ -22,7 +22,7 @@ public class FactoringQuartics
    *  @param var the sole variable in the expression
    *  @return a string representing the factored expression, or the given expression if unfactorable
    */
-   public static String factor(Expression exp, char var)
+   public static List<Expression> factor(Expression exp, char var)
    {
       int power = 4; //exp.getPow(0, var)
       
@@ -55,7 +55,7 @@ public class FactoringQuartics
          return quadFactors(sqFactor.get(), coef, rCoef, resolvent, reduced, var);
       
       exp.removeZeroes();
-      return "(" + exp.toString() + ")";
+      return new ArrayList<>(List.of(exp));
    }
    /**
    *  Finds a factor of the polynomial resolvent that is a perfect square
@@ -84,7 +84,7 @@ public class FactoringQuartics
    *  @param var the sole variable in the polynomial expression
    *  @return a string containing the quadratic factors of the quartic
    */
-   private static String quadFactors(Fraction fac, Fraction[] coef, Fraction[] rCoef, Fraction[] resolvent, boolean reduced, char var)
+   private static List<Expression> quadFactors(Fraction fac, Fraction[] coef, Fraction[] rCoef, Fraction[] resolvent, boolean reduced, char var)
    {
       Fraction h = fac.nthRoot(2).get();
       Fraction k, kpr;
@@ -105,7 +105,7 @@ public class FactoringQuartics
          factor1 = transformBack(factor1, coef);
          factor2 = transformBack(factor2, coef);
       }
-      return "(" + new Expression(toInt(factor1), var).toString() + ")(" + new Expression(toInt(factor2), var) + ")";
+      return new ArrayList<>(List.of(new Expression(toInt(factor1), var), new Expression(toInt(factor2), var)));
    }
    /**
    *  Transforms a quadratic expression to its correct form, given

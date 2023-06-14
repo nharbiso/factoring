@@ -194,11 +194,11 @@ public class Functions
     * @param nums the list of numbers whose lcm is to be computed.
     * @return the lcm of the given list of integers.
     */
-   public static int lcm(List<Integer> nums) {
+   public static BigInteger lcm(List<BigInteger> nums) {
       if(nums.size() == 0)
          throw new IllegalArgumentException("Error: cannot find the gcd of an empty list.");
-      int lcm = nums.get(0);
-      for(int num : nums) {
+      BigInteger lcm = BigInteger.ONE;
+      for(BigInteger num : nums) {
          lcm = lcm(num, lcm);
       }
       return lcm;
@@ -215,5 +215,18 @@ public class Functions
       if(!iter.hasNext())
          throw new IllegalArgumentException("Error: cannot get an item from an empty set.");
       return iter.next();
+   }
+
+   /**
+    * Concatenates the two lists into a new list.
+    * @param list1 the list to be concatenated at the front of the new list.
+    * @param list2 the list to be concatenated at the end of the new list.
+    * @return the concatenation of the two lists.
+    * @param <T> the class of items within the given lists.
+    */
+   public static <T> List<T> concatLists(List<T> list1, List<T> list2) {
+      List<T> list = new ArrayList<>(list1);
+      list.addAll(list2);
+      return list;
    }
 }

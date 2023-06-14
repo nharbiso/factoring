@@ -19,17 +19,14 @@ public class FactoringByGrouping
    *  @param exp the expression to be factored
    *  @return a string representing the factored expression, or the given expression if unfactorable
    */
-   public static String factor(Expression exp)
+   public static List<Expression> factor(Expression exp)
    {
-      String factored = factorByGrouping(exp);
-      if(!factored.equals(exp.toString()))
+      List<Expression> factored = factorByGrouping(exp);
+      if(factored.size() != 1)
          return factored;
       
       factored = factorBySquares(exp);
-      if(!factored.equals(exp.toString()))
-         return factored;
-         
-      return "(" + exp.toString() + ")";
+      return factored;
    }
    /**
    *  Factors a given expression by grouping, and returns a string
@@ -37,7 +34,7 @@ public class FactoringByGrouping
    *  @param exp the expression to be factored
    *  @return the factored expression, or the given expression if unfactorable
    */
-   private static String factorByGrouping(Expression exp)
+   private static List<Expression> factorByGrouping(Expression exp)
    {
       int[][] positions = {{0, 1, 2, 3}, {0, 1, 3, 2}, {0, 2, 1, 3}, {0, 2, 3, 1}, {0, 3, 1, 2}, {0, 3, 2, 1}};
       for(int[] pos : positions)
@@ -54,10 +51,13 @@ public class FactoringByGrouping
          fac.addTerm(e1.getFactor());
          fac.addTerm(e2.getFactor());
       
-         if(e1.equals(e2))      
-            return FactoringBinomials.factor(e1) + FactoringBinomials.factor(fac);
+         if(e1.equals(e2)) {
+            List<Expression> factored = FactoringBinomials.factor(e1);
+            factored.addAll(FactoringBinomials.factor(fac));
+            return factored;
+         }
       }
-      return exp.toString();
+      return new ArrayList<>(List.of(exp));
    }
    /**
    *  Factors a given expression by finding and factoring
@@ -66,7 +66,7 @@ public class FactoringByGrouping
    *  @param exp the expression to be factored
    *  @return the factored expression, or the given expression if unfactorable
    */
-   private static String factorBySquares(Expression exp)
+   private static List<Expression> factorBySquares(Expression exp)
    {
       List<Integer> posSqInd = new ArrayList<Integer>();
       List<Integer> negSqInd = new ArrayList<Integer>();
@@ -85,11 +85,11 @@ public class FactoringByGrouping
       for(int posInd : posSqInd)
          for(int negInd : negSqInd)
          {
-            String factored = factorSquares(exp, posInd, negInd);
-            if(!factored.equals(exp.toString()))
+            List<Expression> factored = factorSquares(exp, posInd, negInd);
+            if(factored.size() != 1)
                return factored;
          }
-      return exp.toString();
+      return new ArrayList<>(List.of(exp));
    }
    /**
    *  A helper method that factors a given expression utilizing differences of squares
@@ -99,7 +99,7 @@ public class FactoringByGrouping
    *  @param negInd the index of perfect square term with a negative coefficient
    *  @return the factored expression, or the given expression if unfactorable
    */
-   private static String factorSquares(Expression exp, int posInd, int negInd)
+   private static List<Expression> factorSquares(Expression exp, int posInd, int negInd)
    {
       Expression exp1 = new Expression();
       exp1.addReducedTerm((int) Math.sqrt(exp.getCoefficient(posInd)), exp.getVars(posInd), new Fraction("1/2"));
@@ -117,12 +117,16 @@ public class FactoringByGrouping
       if(exp3.equals(exp1))
       {
          exp2.addTerm(fac);
-         return FactoringBinomials.factor(exp1) + "(" + exp2.toString() + ")";
+         List<Expression> factored = FactoringBinomials.factor(exp1);
+         factored.add(exp2);
+         return factored;
       }
       else if(exp3.equals(exp2))
       {
          exp1.addTerm(fac);
-         return FactoringBinomials.factor(exp2) + "(" + exp1.toString() + ")";
+         List<Expression> factored = FactoringBinomials.factor(exp2);
+         factored.add(exp1);
+         return factored;
       }
      
       List<Integer> otherIndices = new ArrayList<Integer>();
@@ -138,7 +142,7 @@ public class FactoringByGrouping
             Expression sqrt2 = new Expression(sqrt);
             sqrt.addReducedTerm((int) Math.sqrt(Math.abs(exp.getCoefficient(negInd))), exp.getVars(negInd), new Fraction("1/2"));
             sqrt2.addReducedTerm((int) Math.sqrt(Math.abs(exp.getCoefficient(negInd))) * -1, exp.getVars(negInd), new Fraction("1/2"));
-            return "(" + sqrt.toString() + ")(" + sqrt2.toString() + ")";
+            return new ArrayList<>(List.of(sqrt, sqrt2));
          }
       }
       for(int x = 0; x < otherIndices.size(); x++)
@@ -153,11 +157,11 @@ public class FactoringByGrouping
             exp2.addReducedTerm((int) Math.sqrt(exp.getCoefficient(posInd)), exp.getVars(posInd), new Fraction("1/2"));
             sqrt.multiply(-1);
             exp2.addExpression(sqrt);
-            return "(" + exp1.toString() + ")(" + exp2.toString() + ")";
+            return new ArrayList<>(List.of(exp1, exp2));
          }
       }
       
-      return exp.toString();
+      return new ArrayList<>(List.of(exp));
    }
    /**
    *  Returns a copy of given binomial expression in backwards order

@@ -290,7 +290,8 @@ public class Fraction extends Number implements Comparable<Fraction>
    @Override
    public int compareTo(Fraction frac) {
       BigInteger diff = this.num.multiply(frac.denom).subtract(frac.num.multiply(this.denom));
-      diff = diff.divide(diff.abs());
+      if(diff.compareTo(BigInteger.ZERO) != 0)
+         diff = diff.divide(diff.abs());
       return diff.intValue();
    }
 

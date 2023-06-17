@@ -25,7 +25,7 @@ public class FactoringBinomials {
 
       if(isDifOfSqs(exp)) {
          BigInteger coeff1Root = Functions.nthRoot(exp.getCoeff(0), 2);
-         BigInteger coeff2Root = Functions.nthRoot(exp.getCoeff(1), 2);
+         BigInteger coeff2Root = Functions.nthRoot(exp.getCoeff(1).abs(), 2);
 
          Expression factor1 = new Expression();
          factor1.addReducedTerm(coeff1Root, exp.getVarPowers(0), new Fraction("1/2"));

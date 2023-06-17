@@ -51,15 +51,15 @@ public class FactoringPolynomials {
             coeffs.add(posFactor.getDenom().multiply(posFactor.getNum()));
             coeffs.add(posFactor.getNum().multiply(posFactor.getNum()));
             Expression possCube = new Expression(coeffs, var);
-            Optional<DivisionResult> quotOpt = divide(quotient, possCube, var);
+            Optional<DivisionResult> cbResOpt = divide(quotient, possCube, var);
 
             List<Expression> factored = new ArrayList<>();
             factored.add(factor);
-            if (quotOpt.isPresent() && quotOpt.get().remainder().equals(new Expression())) {
+            if (cbResOpt.isPresent() && cbResOpt.get().remainder().equals(new Expression())) {
                factored.add(possCube);
-               quotient = quotOpt.get().quotient();
-               if(!quotient.equals(new Expression("1")))
-                  factored.addAll(factor(quotient));
+               Expression cbQuotient = cbResOpt.get().quotient();
+               if(!cbQuotient.equals(new Expression("1")))
+                  factored.addAll(factor(cbQuotient));
             } else {
                factored.addAll(factor(quotient));
             }
@@ -113,10 +113,9 @@ public class FactoringPolynomials {
    private static Optional<DivisionResult> synDivide(Expression exp, Fraction factor, char var) {
       // divide out by x - p/q
       List<Fraction> coeffs = new ArrayList<>();
-      coeffs.add(new Fraction(exp.getCoeff(0), factor.getDenom()));
-      for(int i = 1; i < exp.size(); i++) {
+      coeffs.add(new Fraction(exp.getCoeff(0), BigInteger.ONE));
+      for(int i = 1; i < exp.size(); i++)
          coeffs.add(factor.multiply(coeffs.get(i - 1)).add(new Fraction(exp.getCoeff(i))));
-      }
       // divide quotient by q (so that we therefore divided in total by qx-p)
       coeffs.replaceAll(coeff -> coeff.divide(factor.getDenom()));
 

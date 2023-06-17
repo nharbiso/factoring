@@ -69,7 +69,6 @@ public class Factoring {
       Expression exp = new Expression();
       for (int i = 0; i < coefficients.length; i++)
          exp.addTerm(new Term(coefficients[i].getNum(), variables[i]));
-      Set<Character> allVars = exp.getAllVars();
 
       // factor out any common numerical factors and variables
       Term factorTerm = exp.getFactor();
@@ -81,7 +80,7 @@ public class Factoring {
       } else if (exp.size() == 2) {
          // factor as a binomial
          factoredExp = FactoringBinomials.factor(exp);
-      } else if(allVars.size() == 1) {
+      } else if(exp.getAllVars().size() == 1) {
          // factor as a polynomial
          factoredExp = FactoringPolynomials.factor(exp);
       } else if(exp.size() == 4) {

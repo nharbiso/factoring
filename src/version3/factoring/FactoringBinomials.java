@@ -38,8 +38,7 @@ public class FactoringBinomials {
          List<Expression> factors = factor(factor1);
          factors.addAll(factor(factor2));
          return factors;
-      }
-      else if(allCubes(exp)) {
+      } else if(allCubes(exp)) {
          BigInteger coeff1Root = Functions.nthRoot(exp.getCoeff(0), 3);
          BigInteger coeff2Root = Functions.nthRoot(exp.getCoeff(1), 3);
 
@@ -67,6 +66,7 @@ public class FactoringBinomials {
          return FactoringPolynomials.factor(exp);
       return new ArrayList<>(List.of(exp));
    }
+
    /**
     * Determines if a given binomial expression is a difference of squares.
     * @param exp the binomial expression to be processed.
@@ -82,6 +82,7 @@ public class FactoringBinomials {
               && Functions.isNthPower(exp.getCoeff(1).abs(), 2)
               && exp.getCoeff(1).compareTo(BigInteger.ZERO) < 0;
    }
+
    /**
     * Determines if each term in the given binomial expression are perfect cubes.
     * @param exp the binomial expression to be processed.

@@ -11,10 +11,9 @@ import java.util.*;
  * Factors any given simplified expression into separate terms.
  * @author Nathan Harbison
  */
-public class Factoring
-{
+public class Factoring {
    /**
-    * String used in parsing expression input, to keep delimiters.
+    * String used in parsing expression input, to keep delimiters at start of the succeeding token.
     */
    private static final String WITH_DELIMITER = "(?=%1$s)";
    public static void main(String[] args) {
@@ -55,12 +54,12 @@ public class Factoring
       // finds the substring of each term that represents the variables and their powers
       String[] variables = new String[terms.length];
       for (int i = 0; i < variables.length; i++)
-         variables[i] = getVariable(terms[i]);
+         variables[i] = Functions.getVariable(terms[i]);
 
       // parse the coefficient from each term
       Fraction[] coefficients = new Fraction[terms.length];
       for (int i = 0; i < coefficients.length; i++)
-         coefficients[i] = parseCoefficient(terms[i], variables[i]);
+         coefficients[i] = Functions.parseCoefficient(terms[i], variables[i]);
 
       // find factor by which to multiply all coefficients to make them whole
       // and use it to make all coefficient whole
@@ -69,14 +68,14 @@ public class Factoring
       // create expression object from coefficients and variable strings
       Expression exp = new Expression();
       for (int i = 0; i < coefficients.length; i++)
-         exp.addTerm(new Term(coefficients[i].intValue(), variables[i]));
+         exp.addTerm(new Term(coefficients[i].getNum(), variables[i]));
       Set<Character> allVars = exp.getAllVars();
 
       // factor out any common numerical factors and variables
       Term factorTerm = exp.getFactor();
 
       List<Expression> factoredExp = List.of(exp);
-      if (exp.size() == 3 && canBeQuadFactored(exp, allVars)) {
+      if (exp.size() == 3 && Functions.canBeQuadFactored(exp)) {
          // factor as a quadratic
          factoredExp = FactoringQuadratics.factor(exp);
       } else if (exp.size() == 2) {
@@ -84,14 +83,13 @@ public class Factoring
          factoredExp = FactoringBinomials.factor(exp);
       } else if(allVars.size() == 1) {
          // factor as a polynomial
-         exp.addZeroes();
          factoredExp = FactoringPolynomials.factor(exp);
       } else if(exp.size() == 4) {
          // factor by grouping
          factoredExp = FactoringByGrouping.factor(exp);
       }
       
-      if(factoredExp.size() == 1 && factorTerm.isConstant() && factorTerm.getCoefficient() == 1)
+      if(factoredExp.size() == 1 && factorTerm.isConstant() && factorTerm.getCoeff().equals(BigInteger.ONE))
          return expStr;
 
       // group duplicate terms together
@@ -102,7 +100,7 @@ public class Factoring
       }
 
       // start with initial factored out term, perhaps with rational coefficient
-      String factorCoeff = new Fraction(new BigInteger(factorTerm.getCoefficient()+""), fracLCM).toString();
+      String factorCoeff = new Fraction(factorTerm.getCoeff(), fracLCM).toString();
       if (factorCoeff.equals("-1") || factorCoeff.equals("1"))
          factorCoeff = factorCoeff.replaceAll("1", "");
       String factored = factorCoeff + factorTerm.getVarStr();
@@ -119,107 +117,23 @@ public class Factoring
    }
 
    /**
-    * Finds and returns the variable portion (or lack thereof) in a given term.
-    * @param term the term to be analyzed.
-    * @return string representing variable and its power or "" if none is found.
-    */
-   private static String getVariable(String term) {
-      int loc = 0;
-      try {
-         if(term.charAt(loc) == '+' || term.charAt(loc) == '-') // ignore sign of coefficient
-            loc++;
-         while(Character.isDigit(term.charAt(loc)) || term.charAt(loc) == '/') // ignore (fractional) coefficient
-            loc++;
-      } catch(StringIndexOutOfBoundsException e) {
-         return "";
-      }
-      return term.substring(loc);
-   }
-
-   /**
-    * Finds, parses, and returns the coefficient in a given term.
-    * @param term the term to be analyzed.
-    * @param vars the variable(s) contained in the term.
-    * @return the coefficient of the term.
-    */
-   private static Fraction parseCoefficient(String term, String vars) {
-      String coefStr = term;
-      if(!vars.equals(""))
-         coefStr = coefStr.substring(0, coefStr.indexOf(vars));
-
-      if(coefStr.equals("") || coefStr.equals("+"))
-         return Fraction.ONE;
-      if(coefStr.equals("-"))
-         return Fraction.NEG_ONE;
-      return new Fraction(coefStr);
-   }
-
-   /**
     * Finds common (positive) factor to multiply all fractional coefficients by to
     * make them whole numbers, and alters the coefficients accordingly by multiplying
     * them by this common factor.
-    * @param coefs array representing the coefficient of each term.
+    * @param coeffs array representing the coefficient of each term.
     * @return a string representation of the multiplying scalar that makes all
     * coefficients whole when multiplied. If 1, returns nothing; otherwise returns
     * the string representation of the scalar.
     */
-   private static BigInteger getLCM(Fraction[] coefs) {
+   private static BigInteger getLCM(Fraction[] coeffs) {
       List<BigInteger> denoms = new ArrayList<>();
-      for(Fraction coef : coefs)
-         denoms.add(coef.getDenom());
+      for(Fraction coeff : coeffs)
+         denoms.add(coeff.getDenom());
       BigInteger lcm = Functions.lcm(denoms);
 
-      for(int i = 0; i < coefs.length; i++)
-         coefs[i] = coefs[i].multiply(lcm);
+      for(int i = 0; i < coeffs.length; i++)
+         coeffs[i] = coeffs[i].multiply(lcm);
 
       return lcm;
-   }
-   
-   /**
-    * Determines if an expression composed of 3 terms can be factored
-    * similarly to the method utilized for a quadratic polynomial.
-    * @param exp the expression to be tested.
-    * @param allVars set of all unique variables in the expression.
-    * @return whether the expression can be factored like a quadratic.
-    */
-   private static boolean canBeQuadFactored(Expression exp, Set<Character> allVars) {
-      // assumption that expression is 3 terms long
-
-      // test for all permutations of the terms
-      int[][] perms = {{0, 1, 2}, {0, 2, 1}, {1, 0, 2}, {1, 2, 0}, {2, 0, 1}, {2, 1, 0}};
-      for(int[] perm : perms) {
-         boolean factorable = true;
-         for (char var : allVars) {
-            // to be factored like a quadratic, for each variable:
-            //  - the variable's power in the middle term must be half of that in the
-            //    first term or its power in the first term must be zero.
-            if (exp.getPower(perm[0], var) != 0
-                    && (double) exp.getPower(perm[0], var) / 2 != exp.getPower(perm[1], var)) {
-               factorable = false;
-               break;
-            }
-            //  - the variable's power in the middle term must be half of that in the
-            //    last term, if both powers are non-zero, or its power in the last
-            //    term must be zero.
-            if (exp.getPower(perm[2], var) != 0
-                    && (double) exp.getPower(perm[2], var) / 2 != exp.getPower(perm[1], var)) {
-               factorable = false;
-               break;
-            }
-         }
-
-         if(factorable) {
-            // rearrange terms according to this permutation
-            List<Term> terms = new ArrayList<>();
-            while (exp.size() != 0) {
-               terms.add(exp.removeTerm(0));
-            }
-            for (int ind : perm) {
-               exp.addTerm(terms.get(ind));
-            }
-            return true;
-         }
-      }
-      return false;
    }
 }

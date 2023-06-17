@@ -7,162 +7,186 @@ import version3.utilities.Functions;
 
 import java.util.*;
 import java.math.BigInteger;
+import java.util.stream.Collectors;
 
 /**
-*  Class utilized to factor a polynomial expression
-*  @author Nathan Harbison
-*/
-public class FactoringPolynomials
-{
+ * Class utilized to factor a polynomial expression using synthetic division.
+ * @author Nathan Harbison
+ */
+public class FactoringPolynomials {
    /**
-   *  Factors a given polynomial expression
-   *  
-   *  @param exp the expression to be factored
-   *  @return a string representing the factored expression, or the given expression if unfactorable
-   */
-   public static List<Expression> factor(Expression exp)
-   {
+    * Factors a given polynomial expression.
+    * @param exp the expression to be factored.
+    * @return a list consisting of the factors of the expression, or just the
+    * given expression if unfactorable.
+    */
+   public static List<Expression> factor(Expression exp) {
       Set<Character> allVars = exp.getAllVars();
       if(allVars.size() != 1)
          throw new IllegalArgumentException("Error: not a polynomial expression with one variable");
       char var = Functions.getItemFromSet(allVars);
 
-      if(exp.size() <= 2)
-         return new ArrayList<>(List.of(exp));
-      if(exp.size() == 3 && exp.getCoefficient(1) == 0)
-      {
+      exp.addZeroes();
+
+      if(exp.size() <= 2) {
          exp.removeZeroes();
-         if(FactoringBinomials.isDifOfSqs(exp) || FactoringBinomials.areCubes(exp))
-            return FactoringBinomials.factor(exp);
+         return new ArrayList<>(List.of(exp));
       }
-      else if(exp.size() == 3)
-         return FactoringQuadratics.factor(exp);
-   
-      List<Fraction> posFactors = findRationalFact(exp.getCoefficient(0), exp.getCoefficient(exp.size() - 1));
-      for(Fraction posFactor : posFactors)
-      {
-         Fraction sum = Fraction.ZERO;
-         for(int i = 0; i < exp.size(); i++)
-            sum = sum.add(posFactor.pow(exp.getPower(i, var)).multiply(new Fraction(exp.getCoefficient(i))));
-         if(sum.equals(Fraction.ZERO))
-         {
-            Expression divided = synDivide(exp, posFactor, var);
-            List<Integer> coef = new ArrayList<Integer>();
-            coef.add(posFactor.getDenom().multiply(posFactor.getDenom()).intValue());
-            coef.add(posFactor.getDenom().multiply(posFactor.getNum()).intValue());
-            coef.add(posFactor.getNum().multiply(posFactor.getNum()).intValue());
-            Expression possCube = new Expression(coef, var);
-            Expression newDiv = divide(divided, possCube, var);
+
+      // finds all possible rational roots of the polynomial
+      List<Fraction> posFactors = findRationalFact(exp.getCoeff(0), exp.getCoeff(exp.size() - 1));
+      for(Fraction posFactor : posFactors) {
+         // perform synthetic division on the factor
+         Optional<DivisionResult> resOpt = synDivide(exp, posFactor, var);
+         // check if remainder is 0
+         if(resOpt.isPresent() && resOpt.get().remainder().equals(new Expression())) {
+            Expression quotient = resOpt.get().quotient();
+            Expression factor = getLinExp(var, posFactor);
+
+            // determine if we can also pull out a sum/difference of cubes
+            // (i.e. if ax+b is a factor, see if a^3x^3+b^3 = (ax+b)(a^2x^2-abx+b^2x^2)
+            // is a factor too, by dividing out by a^2x^2-abx+b^2x^2)
+            List<BigInteger> coeffs = new ArrayList<>();
+            coeffs.add(posFactor.getDenom().multiply(posFactor.getDenom()));
+            coeffs.add(posFactor.getDenom().multiply(posFactor.getNum()));
+            coeffs.add(posFactor.getNum().multiply(posFactor.getNum()));
+            Expression possCube = new Expression(coeffs, var);
+            Optional<DivisionResult> quotOpt = divide(quotient, possCube, var);
 
             List<Expression> factored = new ArrayList<>();
-            factored.add(getVar(var, posFactor));
-            if(newDiv.size() == 0) {
-               factored.addAll(factor(divided));
-            } else {
+            factored.add(factor);
+            if (quotOpt.isPresent() && quotOpt.get().remainder().equals(new Expression())) {
                factored.add(possCube);
-               factored.addAll(factor(newDiv));
+               quotient = quotOpt.get().quotient();
+               if(!quotient.equals(new Expression("1")))
+                  factored.addAll(factor(quotient));
+            } else {
+               factored.addAll(factor(quotient));
             }
             return factored;
          }
       }
-      if(exp.getPower(0, var) == 4 && exp.getCoefficient(1) == 0 && exp.getCoefficient(3) == 0)
-      {
+
+      if(exp.nonZeroTerms() == 3 && Functions.isPowerOf2(exp.getPower(0, var))) {
          exp.removeZeroes();
-         return FactoringQuadratics.factor(exp);
-      }
-      else if(exp.getPower(0, var) == 4)
-         return FactoringQuartics.factor(exp, var);
+         if(Functions.canBeQuadFactored(exp))
+            return FactoringQuadratics.factor(exp);
+      } else if(exp.getPower(0, var) == 4)
+         return FactoringQuartics.factor(exp);
       else
-      {
          exp.removeZeroes();
-         return new ArrayList<>(List.of(exp));
-      }
+
+      return new ArrayList<>(List.of(exp));
    }
+
    /**
-   *  Finds all possible rational factors of the polynomial in the form of p/q, where
-   *  p is a factor of an integer, the last coefficient in the polynomial, and q is
-   *  the factor of another integer, the first coefficient of said polynomial
-   *  @param c1 the first coefficient of the polynomial
-   *  @param c2 the last coefficient of the polynomial 
-   *  @return a list of all possible rational factors of the function
-   */
-   public static List<Fraction> findRationalFact(int c1, int c2)
+    * Finds all possible rational factors of the polynomial in the form of p/q, where
+    * p is a factor of the coefficient of last term in the polynomial, and q is
+    * the factor of the coefficient of the first term in the polynomial.
+    * @param firstCoeff the coefficient of the first term in the polynomial.
+    * @param lastCoeff the coefficient of the last term in the polynomial.
+    * @return a list of all possible rational factors of the function.
+    */
+   public static List<Fraction> findRationalFact(BigInteger firstCoeff, BigInteger lastCoeff)
    {
-      List<Integer> f1 = Functions.findFactors(Math.abs(c1));
-      List<Integer> f2 = Functions.findFactors(Math.abs(c2));
-      Set<Fraction> set = new HashSet<Fraction>();
-      for(int x = 0; x < f1.size(); x++)
-         for(int y = 0; y < f2.size(); y++)
-         {
-            set.add(new Fraction(f2.get(y), f1.get(x)));
-            set.add(new Fraction(f2.get(y) * -1, f1.get(x)));
+      List<BigInteger> firstFactors = Functions.findFactors(firstCoeff.abs());
+      List<BigInteger> lastFactors = Functions.findFactors(lastCoeff.abs());
+      Set<Fraction> factors = new HashSet<>();
+      for(BigInteger firstFactor : firstFactors)
+         for(BigInteger lastFactor : lastFactors) {
+            factors.add(new Fraction(lastFactor, firstFactor));
+            factors.add(new Fraction(lastFactor.negate(), firstFactor));
          }
-      return new ArrayList<Fraction>(set);
+      return new ArrayList<>(factors);
    }
+
    /**
-   *  Divides the expression by the given rational factor using synthetic
-   *  division
-   *  @param exp the expression to be divided
-   *  @param factor the factor of the expression
-   *  @param var the sole variable in the expression
-   *  @return the quotient of the synthetic division
-   */
-   private static Expression synDivide(Expression exp, Fraction factor, char var)
-   {
-      List<Integer> coef = new ArrayList<Integer>();
-      coef.add(exp.getCoefficient(0) / factor.getDenom().intValue());
-      for(int x = 1; x < exp.size() - 1; x++)
-         coef.add(factor.multiply(new Fraction(coef.get(x - 1) * factor.getDenom().intValue())).add(new Fraction(exp.getCoefficient(x))).divide(factor.getDenom()).getNum().intValue());
-      return new Expression(coef, var);
-   }
-   /**
-   *  Divides a polynomial expression by another and returns the result
-   *  @param dividend the polynomial expression to be divided
-   *  @param divisor the polynomial dividing the dividend
-   *  @param var the variable in the polynomial
-   *  @return the result of the division (blank if there is a remainder or 
-   *  the resulting polynomial has fractional coefficients)
-   */
-   private static Expression divide(Expression dividend, Expression divisor, char var)
-   {
-      List<Integer> dendInt = dividend.getCoefficients();
-      List<Fraction> dend = new ArrayList<Fraction>();
-      for(int x = 0; x < dendInt.size(); x++)
-         dend.add(new Fraction(dendInt.get(x)));
-      List<Integer> sor = divisor.getCoefficients();
-      List<Fraction> quotient = new ArrayList<Fraction>();
-      for(int x = 0; x < dend.size() - sor.size() + 1; x++)
-      {
-         quotient.add(dend.get(x).divide(new BigInteger(sor.get(0) + "")));
-         for(int y = x; y < x + sor.size(); y++)
-            dend.set(y, dend.get(y).subtract(quotient.get(x).multiply(new Fraction(sor.get(y-x)))));
+    * Divides the expression by the given rational factor p/q using synthetic
+    * division (i.e. division the expression by qx-p). Returns the quotient and
+    * remainder, or nothing if the result has fractional coefficients.
+    * @param exp the expression to be divided.
+    * @param factor the factor of the expression.
+    * @param var the sole variable in the expression.
+    * @return the quotient and remainder of the synthetic division, or nothing
+    * if either result has fractional coefficients.
+    */
+   private static Optional<DivisionResult> synDivide(Expression exp, Fraction factor, char var) {
+      // divide out by x - p/q
+      List<Fraction> coeffs = new ArrayList<>();
+      coeffs.add(new Fraction(exp.getCoeff(0), factor.getDenom()));
+      for(int i = 1; i < exp.size(); i++) {
+         coeffs.add(factor.multiply(coeffs.get(i - 1)).add(new Fraction(exp.getCoeff(i))));
       }
-      
-      List<Integer> toInt = new ArrayList<Integer>();
-      for(int x = 0; x < quotient.size(); x++)
-         if(quotient.get(x).isWhole())
-            toInt.add(quotient.get(x).intValue());
-         else
-            return new Expression();
-      for(int x = quotient.size(); x < dend.size(); x++)
-         if(!dend.get(x).equals(Fraction.ZERO))
-            return new Expression();
-      return new Expression(toInt, var);
+      // divide quotient by q (so that we therefore divided in total by qx-p)
+      coeffs.replaceAll(coeff -> coeff.divide(factor.getDenom()));
+
+      boolean allWhole = coeffs.stream().allMatch(Fraction::isWhole);
+      if(!allWhole)
+         return Optional.empty();
+
+      List<BigInteger> coeffsInt = coeffs.stream().map(Fraction::getNum).toList();
+      Expression quotient = new Expression(coeffsInt.subList(0, coeffs.size() - 1), var);
+      Expression remainder = new Expression(List.of(coeffsInt.get(coeffs.size() - 1)), var);
+      return Optional.of(new DivisionResult(quotient, remainder));
    }
+
    /**
-   *  Returns a string representation of binomial linear factor
-   *  of the polynomial
-   *  @param var the sole variable in the expression
-   *  @param factor the factor of the expression
-   *  @return a string representation of the factor
-   */
-   private static Expression getVar(char var, Fraction factor)
-   {
+    * Divides a polynomial expression by another and returns the result.
+    * @param dividend the polynomial expression to be divided.
+    * @param divisor the polynomial dividing the dividend.
+    * @param var the variable in the polynomial.
+    * @return the result of the division, or nothing if the resulting
+    * polynomial has fractional coefficients.
+    */
+   private static Optional<DivisionResult> divide(Expression dividend, Expression divisor, char var) {
+      List<Fraction> expCoeffs = dividend.getCoeffs().stream()
+              .map(Fraction::new).collect(Collectors.toList());
+      List<BigInteger> divCoeffs = divisor.getCoeffs();
+
+      // divide by the divisor (expCoeffs stores the dividends coefficients during the process)
+      List<Fraction> quotient = new ArrayList<>();
+      for(int i = 0; i < expCoeffs.size() - divCoeffs.size() + 1; i++) {
+         quotient.add(expCoeffs.get(i).divide(divCoeffs.get(0)));
+         for(int j = i; j < i + divCoeffs.size(); j++)
+            expCoeffs.set(j, expCoeffs.get(j).subtract(quotient.get(i).multiply(new Fraction(divCoeffs.get(j-i)))));
+      }
+
+      // entries past quotient.size() in expCoeffs now store the remaining
+      // coefficients, i.e. the remainder
+
+      boolean quotientWhole = quotient.stream().allMatch(Fraction::isWhole);
+      boolean remainderWhole = expCoeffs.stream().allMatch(Fraction::isWhole);
+      if(!quotientWhole || !remainderWhole)
+         return Optional.empty();
+
+      List<BigInteger> quotInt = quotient.stream().map(Fraction::getNum).toList();
+      List<BigInteger> remInt = expCoeffs.subList(quotient.size() + 1, expCoeffs.size())
+              .stream().map(Fraction::getNum).toList();
+      return Optional.of(new DivisionResult(new Expression(quotInt, var), new Expression(remInt, var)));
+   }
+
+   /**
+    * Returns the binomial linear polynomial with the given rational
+    * number as its singular root.
+    * @param var the sole variable in the expression.
+    * @param root the root of the expression.
+    * @return the binomial linear expression.
+    */
+   private static Expression getLinExp(char var, Fraction root) {
       Expression exp = new Expression();
-      Map<Character, Integer> map = new HashMap<Character, Integer>();
-      map.put(var, 1);
-      exp.addTerm(new Term(factor.getDenom().intValue(), map));
-      exp.addTerm(new Term(factor.getNum().intValue() * -1, new HashMap<Character, Integer>()));
+      Map<Character, Integer> varPow = new HashMap<>();
+      varPow.put(var, 1);
+      exp.addTerm(new Term(root.getDenom(), varPow));
+      exp.addTerm(new Term(root.getNum().negate(), new HashMap<>()));
       return exp;
    }
+
+
+   /**
+    * Wrapper class that stores the result of expression division,
+    * i.e. the quotient and remainder.
+    * @param quotient  The quotient of the division.
+    * @param remainder The remainder of the division.
+    */
+   private record DivisionResult(Expression quotient, Expression remainder) {}
 }

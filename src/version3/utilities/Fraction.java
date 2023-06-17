@@ -5,14 +5,12 @@ import java.text.NumberFormat;
 import java.util.*;
 
 /**
- * A class based, immutable representation of a rational number, or Fraction.
+ * A class based, immutable representation of a rational number, or fraction.
  * @author Nathan Harbison
  */
-public class Fraction extends Number implements Comparable<Fraction>
-{
+public class Fraction extends Number implements Comparable<Fraction> {
    /** The numerator and denominator of the fraction. */
    private BigInteger num, denom;
-   private static final Fraction[] nullArr = {new Fraction(0, 1)};
    /** A fractional representation of the number 1. */
    public static final Fraction ONE = new Fraction(1, 1);
    /** A fractional representation of the number -1. */
@@ -25,7 +23,7 @@ public class Fraction extends Number implements Comparable<Fraction>
     * @param number the value of the fraction.
     */
    public Fraction(int number) {
-      this(new BigInteger(number+""), BigInteger.ONE);
+      this(BigInteger.valueOf(number), BigInteger.ONE);
    }
 
    /**
@@ -42,7 +40,7 @@ public class Fraction extends Number implements Comparable<Fraction>
     * @param denom the denominator of the fraction.
     */
    public Fraction(int num, int denom) {
-      this(new BigInteger(num + ""), new BigInteger(denom + ""));
+      this(BigInteger.valueOf(num), BigInteger.valueOf(denom));
    }
 
    /**
@@ -265,8 +263,8 @@ public class Fraction extends Number implements Comparable<Fraction>
     * @return whether the given fraction is a factor of this fraction.
     */
    public boolean isFactor(Fraction frac) {
-      return this.num.mod(frac.num).compareTo(BigInteger.ZERO) == 0
-              && this.denom.mod(frac.denom).compareTo(BigInteger.ZERO) == 0;
+      return this.num.mod(frac.num).equals(BigInteger.ZERO)
+              && this.denom.mod(frac.denom).equals(BigInteger.ZERO);
    }
 
    /**
@@ -275,7 +273,7 @@ public class Fraction extends Number implements Comparable<Fraction>
     */
    public boolean isWhole()
    {
-      return this.denom.compareTo(BigInteger.ONE) == 0;
+      return this.denom.equals(BigInteger.ONE);
    }
 
 
@@ -290,7 +288,7 @@ public class Fraction extends Number implements Comparable<Fraction>
    @Override
    public int compareTo(Fraction frac) {
       BigInteger diff = this.num.multiply(frac.denom).subtract(frac.num.multiply(this.denom));
-      if(diff.compareTo(BigInteger.ZERO) != 0)
+      if(!diff.equals(BigInteger.ZERO))
          diff = diff.divide(diff.abs());
       return diff.intValue();
    }
@@ -305,27 +303,27 @@ public class Fraction extends Number implements Comparable<Fraction>
    }
 
    /**
-    *  Determines equality between the fraction and another object,
-    *  returning true if both are identical fractions.
-    *  @return whether the object is an identical fraction.
+    * Determines equality between the fraction and another object,
+    * returning true if both are identical fractions.
+    * @return whether the object is an identical fraction.
     */
    @Override
    public boolean equals(Object obj) {
       if(this == obj)
          return true;
       if(obj instanceof Fraction frac) {
-         return this.num.compareTo(frac.num) == 0 && this.denom.compareTo(frac.denom) == 0;
+         return this.num.equals(frac.num) && this.denom.equals(frac.denom);
       }
       return false;
    }
 
    /**
-    *  Returns a string value of this fraction.
-    *  @return a string expression of this fraction.
+    * Returns a string value of this fraction.
+    * @return a string expression of this fraction.
     */
    @Override
    public String toString() {
-      if(this.denom.compareTo(BigInteger.ONE) != 0)
+      if(!this.denom.equals(BigInteger.ONE))
          return this.num.toString() + "/" + this.denom.toString();
       return this.num.toString();
    }

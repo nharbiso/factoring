@@ -31,7 +31,7 @@ public class Factoring {
             factored = Scripts.superscriptNum(factored);
 
             if(!factorable) {
-               JOptionPane.showMessageDialog(null, "The expression " + expStr + " is not factorable.");
+               JOptionPane.showMessageDialog(null, "The expression " + expStr + " could not be factored.");
             } else {
                JOptionPane.showMessageDialog(null, expStr + " factored is:\n" + factored);
             }

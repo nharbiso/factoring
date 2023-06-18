@@ -157,7 +157,17 @@ public class FactoringByGrouping
             Expression factor2 = new Expression(factor1);
             factor1.addReducedTerm(negSqRoot, exp.getVarPowers(negInd), new Fraction("1/2"));
             factor2.addReducedTerm(negSqRoot.negate(), exp.getVarPowers(negInd), new Fraction("1/2"));
-            return new ArrayList<>(List.of(factor1, factor2));
+
+            List<Expression> factored = new ArrayList<>();
+            if(Functions.canBeQuadFactored(factor1))
+               factored.addAll(FactoringQuadratics.factor(factor1));
+            else
+               factored.add(factor1);
+            if(Functions.canBeQuadFactored(factor2))
+               factored.addAll(FactoringQuadratics.factor(factor2));
+            else
+               factored.add(factor2);
+            return factored;
          }
       }
       for(int i = 0; i < 2; i++) {
@@ -170,10 +180,19 @@ public class FactoringByGrouping
             factor2.multiply(-1);
             factor2.addReducedTerm(0, Functions.nthRoot(exp.getCoeff(posInd), 2), exp.getVarPowers(posInd), new Fraction("1/2"));
 
-            return new ArrayList<>(List.of(factor1, factor2));
+            List<Expression> factored = new ArrayList<>();
+            if(Functions.canBeQuadFactored(factor1))
+               factored.addAll(FactoringQuadratics.factor(factor1));
+            else
+               factored.add(factor1);
+            if(Functions.canBeQuadFactored(factor2))
+               factored.addAll(FactoringQuadratics.factor(factor2));
+            else
+               factored.add(factor2);
+            return factored;
          }
       }
-      
+
       return new ArrayList<>(List.of(exp));
    }
 

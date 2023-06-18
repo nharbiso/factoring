@@ -212,62 +212,6 @@ public class Fraction extends Number implements Comparable<Fraction> {
    }
 
    /**
-    * Finds all factors of the fraction, or all fractions with a numerator and denominator
-    * that are factors of the fraction's numerator and denominator respectively.
-    * @return a list of factors of the fraction.
-    */
-   public List<Fraction> findFactors()
-   {
-      List<BigInteger> numFactors = Functions.findFactors(this.num.abs());
-      List<BigInteger> denomFactors = Functions.findFactors(this.denom);
-
-      Set<Fraction> factorsSet = new HashSet<>();
-      for(BigInteger numFactor : numFactors)
-         for(BigInteger denomFactor : denomFactors)
-            factorsSet.add(new Fraction(numFactor, denomFactor));
-
-      List<Fraction> factors = new ArrayList<>(factorsSet);
-      Collections.sort(factors);
-      return factors;
-   }
-
-   /**
-    * Finds all factors of the fraction that are perfect squares, or all fractions
-    * with a numerator and denominator that are both perfect squares and are factors
-    * of the fraction's numerator and denominator respectively.
-    * @return a list of perfect square factors of the fraction.
-    */
-   public List<Fraction> findSqFactors()
-   {
-      if(!isNthPower(2)) {
-         return new ArrayList<>();
-      }
-
-      List<BigInteger> numFactors = Functions.findFactors(Functions.nthRoot(this.num.abs(), 2));
-      List<BigInteger> denomFactors = Functions.findFactors(Functions.nthRoot(this.denom, 2));
-
-      Set<Fraction> factorsSet = new HashSet<>();
-      for(BigInteger numFactor : numFactors)
-         for(BigInteger denomFactor : denomFactors)
-            factorsSet.add(new Fraction(numFactor.multiply(numFactor), denomFactor.multiply(denomFactor)));
-
-      List<Fraction> factors = new ArrayList<>(factorsSet);
-      Collections.sort(factors);
-      return factors;
-   }
-
-   /**
-    * Determines if the given fraction is a factor of this fraction, or if the given fraction's
-    * numerator and denominator are factors of this fraction's numerator and denominator, respectively.
-    * @param frac the fraction to be tested as a factor.
-    * @return whether the given fraction is a factor of this fraction.
-    */
-   public boolean isFactor(Fraction frac) {
-      return this.num.mod(frac.num).equals(BigInteger.ZERO)
-              && this.denom.mod(frac.denom).equals(BigInteger.ZERO);
-   }
-
-   /**
     * Determines if the fraction is an integer (that it has a denominator of 1).
     * @return whether the fraction is an integer.
     */
@@ -276,6 +220,17 @@ public class Fraction extends Number implements Comparable<Fraction> {
       return this.denom.equals(BigInteger.ONE);
    }
 
+   // ------------------------------------------------------------------------------
+   // Static methods
+
+   /**
+    * Finds and returns the common denominator of a list of fractions.
+    * @param fracs the list of fractions.
+    * @return the common denominator of the fractions in the list.
+    */
+   public static BigInteger commonDenom(List<Fraction> fracs) {
+      return Functions.lcm(fracs.stream().map(Fraction::getDenom).toList());
+   }
 
    // ------------------------------------------------------------------------------
    // Methods for string conversion, primitive conversion, and equality

@@ -125,14 +125,9 @@ public class Factoring {
     * the string representation of the scalar.
     */
    private static BigInteger getLCM(Fraction[] coeffs) {
-      List<BigInteger> denoms = new ArrayList<>();
-      for(Fraction coeff : coeffs)
-         denoms.add(coeff.getDenom());
-      BigInteger lcm = Functions.lcm(denoms);
-
+      BigInteger lcm = Fraction.commonDenom(Arrays.asList(coeffs));
       for(int i = 0; i < coeffs.length; i++)
          coeffs[i] = coeffs[i].multiply(lcm);
-
       return lcm;
    }
 }

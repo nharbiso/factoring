@@ -73,15 +73,23 @@ public class FactoringQuartics {
     * @return a perfect square factor of the resolvent.
     */
    private static Optional<Fraction> findResolvSqFactor(Fraction[] resolvent) {
-      List<Fraction> sqFactors = resolvent[3].findSqFactors();
-      for(Fraction sqFactor : sqFactors) {
-         Fraction eval = sqFactor.pow(3).multiply(resolvent[0])
-                           .add(sqFactor.pow(2).multiply(resolvent[1]))
-                           .add(sqFactor.multiply(resolvent[2]))
-                           .add(resolvent[3]);
-         if(eval.compareTo(Fraction.ZERO) == 0)
-            return Optional.of(sqFactor);
-      }
+      BigInteger firstCoeff = Fraction.commonDenom(Arrays.asList(resolvent)).abs();
+      BigInteger lastCoeff = resolvent[3].multiply(firstCoeff).getNum().abs();
+      if(!Functions.isNthPower(firstCoeff, 2) || !Functions.isNthPower(lastCoeff, 2))
+         return Optional.empty();
+
+      List<BigInteger> firstFactors = Functions.findFactors(Functions.nthRoot(firstCoeff, 2));
+      List<BigInteger> lastFactors = Functions.findFactors(Functions.nthRoot(lastCoeff, 2));
+      for(BigInteger firstFactor : firstFactors)
+         for(BigInteger lastFactor : lastFactors) {
+            Fraction sqFactor = new Fraction(lastFactor.pow(2), firstFactor.pow(2));
+            Fraction eval = sqFactor.pow(3).multiply(resolvent[0])
+                              .add(sqFactor.pow(2).multiply(resolvent[1]))
+                              .add(sqFactor.multiply(resolvent[2]))
+                              .add(resolvent[3]);
+            if(eval.compareTo(Fraction.ZERO) == 0)
+               return Optional.of(sqFactor);
+         }
       return Optional.empty();
    }
    
@@ -135,7 +143,7 @@ public class FactoringQuartics {
 
       // multiply by one of the factors of coeff[0] (a'), which we had divided out,
       // to make the coefficients whole again
-      BigInteger fracLCM = Functions.lcm(transformed.get(1).getDenom(), transformed.get(2).getDenom());
+      BigInteger fracLCM = Fraction.commonDenom(transformed);
       return transformed.stream().map(coeff -> coeff.multiply(fracLCM).getNum()).toList();
    }
 }

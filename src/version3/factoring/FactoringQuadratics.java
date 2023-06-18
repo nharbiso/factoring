@@ -27,7 +27,7 @@ public class FactoringQuadratics {
 
       BigInteger[] splitMid = new BigInteger[2];
       List<BigInteger> factors = Functions.findFactors(target.abs());
-      for(BigInteger factor1 : factors.subList(0, factors.size() / 2)) { // only need to check first half
+      for(BigInteger factor1 : factors) {
          BigInteger factor2 = target.abs().divide(factor1);
          if(findSum && factor1.add(factor2).equals(exp.getCoeff(1).abs())) {
             if(exp.getCoeff(1).compareTo(BigInteger.ZERO) > 0) {
@@ -42,10 +42,6 @@ public class FactoringQuadratics {
          else if(!findSum && factor1.subtract(factor2).equals(exp.getCoeff(1))) {
             splitMid[0] = factor1;
             splitMid[1] = factor2.negate();
-            break;
-         } else if(!findSum && factor2.subtract(factor1).equals(exp.getCoeff(1))) {
-            splitMid[0] = factor1.negate();
-            splitMid[1] = factor2;
             break;
          }
       }

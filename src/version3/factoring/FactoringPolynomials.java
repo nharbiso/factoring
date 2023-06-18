@@ -146,12 +146,12 @@ public class FactoringPolynomials {
       List<Fraction> quotient = new ArrayList<>();
       for(int i = 0; i < expCoeffs.size() - divCoeffs.size() + 1; i++) {
          quotient.add(expCoeffs.get(i).divide(divCoeffs.get(0)));
-         for(int j = i; j < i + divCoeffs.size(); j++)
-            expCoeffs.set(j, expCoeffs.get(j).subtract(quotient.get(i).multiply(new Fraction(divCoeffs.get(j-i)))));
+         for(int j = 0; j < divCoeffs.size(); j++)
+            expCoeffs.set(i + j, expCoeffs.get(i + j).subtract(quotient.get(i).multiply(new Fraction(divCoeffs.get(j)))));
       }
 
-      // entries past quotient.size() in expCoeffs now store the remaining
-      // coefficients, i.e. the remainder
+      // expCoeffs now has zeroes until quotient.size() - 1, inclusive
+      // afterwards is remaining coefficients, i.e. the remainder
 
       boolean quotientWhole = quotient.stream().allMatch(Fraction::isWhole);
       boolean remainderWhole = expCoeffs.stream().allMatch(Fraction::isWhole);
@@ -159,7 +159,7 @@ public class FactoringPolynomials {
          return Optional.empty();
 
       List<BigInteger> quotInt = quotient.stream().map(Fraction::getNum).toList();
-      List<BigInteger> remInt = expCoeffs.subList(quotient.size() + 1, expCoeffs.size())
+      List<BigInteger> remInt = expCoeffs.subList(quotient.size(), expCoeffs.size())
               .stream().map(Fraction::getNum).toList();
       return Optional.of(new DivisionResult(new Expression(quotInt, var), new Expression(remInt, var)));
    }

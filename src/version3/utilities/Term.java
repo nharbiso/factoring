@@ -189,10 +189,10 @@ public class Term {
     public String frontStr() {
         if(this.getCoeff().equals(BigInteger.ZERO))
             return "";
-        String termStr = this.coefficient + this.getVarStr();
+        String coeffStr = this.coefficient.toString();
         if(this.coefficient.abs().equals(BigInteger.ONE) && !this.vars.isEmpty())
-            termStr = termStr.replaceAll("1", "");
-        return termStr;
+            coeffStr = coeffStr.replaceAll("1", "");
+        return coeffStr + this.getVarStr();
     }
 
     /**
